@@ -3,9 +3,38 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataTableUtils", "DataTableUtils", "{9D250068-5226-4E0B-BCA0-0351853184AE}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared.DataTableUtils.Core", "Shared.DataTableUtils.Core\Shared.DataTableUtils.Core.shproj", "{524A3944-33A2-47B4-9693-39C3353EC9DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MT.Tools.Fx", "MT.Tools.Fx\MT.Tools.Fx.csproj", "{6A323CFB-2B0F-40F7-80AA-2D41E4F22EE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestFx", "UnitTestFx\UnitTestFx.csproj", "{E9495236-4958-476B-905F-1171A5F32950}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Shared.DataTableUtils.Core\Shared.DataTableUtils.Core.projitems*{524a3944-33a2-47b4-9693-39c3353ec9dd}*SharedItemsImports = 13
+		Shared.DataTableUtils.Core\Shared.DataTableUtils.Core.projitems*{6a323cfb-2b0f-40f7-80aa-2d41e4f22ee2}*SharedItemsImports = 4
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A323CFB-2B0F-40F7-80AA-2D41E4F22EE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A323CFB-2B0F-40F7-80AA-2D41E4F22EE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A323CFB-2B0F-40F7-80AA-2D41E4F22EE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A323CFB-2B0F-40F7-80AA-2D41E4F22EE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9495236-4958-476B-905F-1171A5F32950}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9495236-4958-476B-905F-1171A5F32950}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9495236-4958-476B-905F-1171A5F32950}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9495236-4958-476B-905F-1171A5F32950}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{524A3944-33A2-47B4-9693-39C3353EC9DD} = {9D250068-5226-4E0B-BCA0-0351853184AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {412B0F7C-6028-4585-8102-3B5873B6C24F}
