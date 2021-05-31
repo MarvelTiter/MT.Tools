@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace Shared.DataTableUtils.Core {
     public static class DataTableHelper {
@@ -9,14 +10,37 @@ namespace Shared.DataTableUtils.Core {
             return dt != null && dt.Rows.Count > 0;
         }
 
-        public static IEnumerable<T> ToEnumerable<T>(this DataTable dt) {
-            foreach (DataRow item in dt.Rows) {
-                yield return item.Parse<T>();
+        public static IEnumerable<T> ToEnumerable<T>(this DataTable self, bool mapAllFields = false) {
+            foreach (DataRow row in self.Rows) {
+                yield return row.Parse<T>(mapAllFields);
             }
         }
 
-        public static T Parse<T>(this DataRow row) {
-            return default;
+        public static IEnumerable<T> Select<T>(this DataTable self, Func<DataRow, bool> filter, bool mapAllFields = false) {
+            foreach (DataRow row in self.Rows) {
+                if (filter.Invoke(row)) {
+                    yield return row.Parse<T>(mapAllFields);
+                }
+            }
+        }
+
+        public static T Parse<T>(this DataRow row, bool mapAllFields) {
+            var columns = row.Table.Columns;
+            var func = DataTableBuilder.GetCreator(typeof(T), columns, mapAllFields);
+            return (T)func.Invoke(row);
+        }
+
+        public static T Value<T>(this DataRow self, string key) {
+            if (!self.Table.Columns.Contains(key)) {
+                throw new ArgumentException($"column {key} is not contains in datatable");
+            }
+
+            if (self.IsNull(key)) {
+                return default;
+            }
+            var val = self[key];
+            var undeylying = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+            return (T)Convert.ChangeType(val, undeylying);
         }
     }
 }
