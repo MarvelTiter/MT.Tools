@@ -15,11 +15,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReflectionUtils", "Reflecti
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared.ReflectionUtils.Core", "Shared.ReflectionUtils.Core\Shared.ReflectionUtils.Core.shproj", "{FC0D0B2A-1119-48F5-8AEF-8C510750B071}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mapper", "Mapper", "{60815823-EF0F-48CC-8358-A79D25380B38}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared.Mapper.Core", "Shared.Mapper.Core\Shared.Mapper.Core.shproj", "{5B08F372-4B32-4436-8180-8BDC23B3964A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Strings", "Strings", "{F3C1A37A-AEE6-4F74-BA79-635039551CAA}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared.StringExtension", "Shared.StringExtension\Shared.StringExtension.shproj", "{11D11DE8-AA2A-4770-94C4-3FE1CB2B4654}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Shared.StringExtension\Shared.StringExtension.projitems*{11d11de8-aa2a-4770-94c4-3fe1cb2b4654}*SharedItemsImports = 13
 		Shared.DataTableUtils.Core\Shared.DataTableUtils.Core.projitems*{524a3944-33a2-47b4-9693-39c3353ec9dd}*SharedItemsImports = 13
+		Shared.Mapper.Core\Shared.Mapper.Core.projitems*{5b08f372-4b32-4436-8180-8bdc23b3964a}*SharedItemsImports = 13
 		Shared.DataTableUtils.Core\Shared.DataTableUtils.Core.projitems*{6a323cfb-2b0f-40f7-80aa-2d41e4f22ee2}*SharedItemsImports = 4
-		Shared.ReflectionUtils.Core\Shared.ReflectionUtils.Core.projitems*{e9495236-4958-476b-905f-1171a5f32950}*SharedItemsImports = 4
+		Shared.Mapper.Core\Shared.Mapper.Core.projitems*{6a323cfb-2b0f-40f7-80aa-2d41e4f22ee2}*SharedItemsImports = 4
+		Shared.ReflectionUtils.Core\Shared.ReflectionUtils.Core.projitems*{6a323cfb-2b0f-40f7-80aa-2d41e4f22ee2}*SharedItemsImports = 4
+		Shared.StringExtension\Shared.StringExtension.projitems*{6a323cfb-2b0f-40f7-80aa-2d41e4f22ee2}*SharedItemsImports = 4
 		Shared.ReflectionUtils.Core\Shared.ReflectionUtils.Core.projitems*{fc0d0b2a-1119-48f5-8aef-8c510750b071}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +54,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{524A3944-33A2-47B4-9693-39C3353EC9DD} = {9D250068-5226-4E0B-BCA0-0351853184AE}
 		{FC0D0B2A-1119-48F5-8AEF-8C510750B071} = {5E4E7F29-2ED0-47C8-BFE6-3BCC10645C15}
+		{5B08F372-4B32-4436-8180-8BDC23B3964A} = {60815823-EF0F-48CC-8358-A79D25380B38}
+		{11D11DE8-AA2A-4770-94C4-3FE1CB2B4654} = {F3C1A37A-AEE6-4F74-BA79-635039551CAA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {412B0F7C-6028-4585-8102-3B5873B6C24F}

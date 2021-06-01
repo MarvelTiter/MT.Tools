@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shared.DataTableUtils.Core;
+using Shared.Mapper.Core;
 using Shared.ReflectionUtils.Core;
+using Shared.StringExtension;
 using System;
 using System.Data;
 using System.Linq;
@@ -9,11 +11,22 @@ namespace UnitTestFx {
     [TestClass]
     public class UnitTest1 {
         enum Gender {
-            Boy,
-            Girl
+            Male,
+            Female
         }
 
         class User {
+            public string Name { get; set; }
+            public int Age { get; set; }
+            public bool IsSafe { get; set; }
+            public Gender Gender { get; set; }
+
+            public void Update() {
+                Age += 1;
+            }
+        }
+
+        class UserDTO {
             public string Name { get; set; }
             public int Age { get; set; }
             public bool IsSafe { get; set; }
@@ -34,14 +47,14 @@ namespace UnitTestFx {
             row1[0] = "管理员";
             row1[1] = 22;
             row1[2] = true;
-            row1[3] = Gender.Boy;
+            row1[3] = Gender.Male;
             dt.Rows.Add(row1);
 
             var row2 = dt.NewRow();
             row2[0] = "测试员";
             row2[1] = 21;
             row2[2] = false;
-            row2[3] = Gender.Girl;
+            row2[3] = Gender.Female;
             dt.Rows.Add(row2);
             return dt;
         }
@@ -53,7 +66,7 @@ namespace UnitTestFx {
             Assert.AreEqual(user.Name, "管理员");
             Assert.AreEqual(user.Age, 22);
             Assert.AreEqual(user.IsSafe, true);
-            Assert.AreEqual(user.Gender, Gender.Boy);
+            Assert.AreEqual(user.Gender, Gender.Male);
         }
 
         [TestMethod]
@@ -72,6 +85,38 @@ namespace UnitTestFx {
             Assert.AreEqual(user.Age, 18);
             user.Invoke("Update");
             Assert.AreEqual(user.Age, 19);
+        }
+
+        [TestMethod]
+        public void TestString() {
+            if ("123".IsNumeric<int>(out var v)) {
+                Assert.AreEqual(123, v);
+            } else
+                Assert.Fail();
+
+            if ("123.12".IsNumeric<double>(out var v2)) {
+                Assert.AreEqual(123.12, v2);
+            } else
+                Assert.Fail();
+
+            if ("-123.12".IsNumeric<double>(out var v3)) {
+                Assert.AreEqual(-123.12, v3);
+            } else
+                Assert.Fail();
+        }
+
+        [TestMethod]
+        public void TestMapper() {
+            var user = new User {
+                Name = "测试",
+                Age = 22,
+                IsSafe = true,
+                Gender = Gender.Male
+            };
+            UserDTO userDTO = Mapper.Map<User, UserDTO>(user);
+            Mapper.CreateMap<User, UserDTO>(ctx => {
+                
+            });
         }
     }
 }

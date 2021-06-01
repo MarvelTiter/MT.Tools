@@ -44,5 +44,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="..\Shared.DataTableUtils.Core\Shared.DataTableUtils.Core.projitems" Label="Shared" />
+  <Import Project="..\Shared.Mapper.Core\Shared.Mapper.Core.projitems" Label="Shared" />
+  <Import Project="..\Shared.ReflectionUtils.Core\Shared.ReflectionUtils.Core.projitems" Label="Shared" />
+  <Import Project="..\Shared.StringExtension\Shared.StringExtension.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
