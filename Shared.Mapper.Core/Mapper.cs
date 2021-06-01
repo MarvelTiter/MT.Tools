@@ -14,25 +14,51 @@ namespace Shared.Mapper.Core {
             return MapperLink<Source, Target>.Map(source);
         }
 
+        /// <summary>
+        /// 配置映射
+        /// </summary>
+        /// <typeparam name="Source"></typeparam>
+        /// <typeparam name="Target"></typeparam>
+        /// <param name="context"></param>
         public static void CreateMap<Source, Target>(Action<MappingProfile<Source, Target>> context = null) {
-            var map = new MappingProfile<Source, Target>();
+            var map = internalCreate<Source, Target>();
             if (context == null) {
                 map.AutoMap();
             } else {
                 context.Invoke(map);
-            }
+            }            
+        }
+        /// <summary>
+        /// 创建 MappingProfile，并检查是否重复
+        /// </summary>
+        /// <typeparam name="Source"></typeparam>
+        /// <typeparam name="Target"></typeparam>
+        /// <returns></returns>
+        private static MappingProfile<Source, Target> internalCreate<Source, Target>() {
+            var map = new MappingProfile<Source, Target>();
             bool contain = cache.Any(p => p.CheckExit(typeof(Source), typeof(Target)));
-            if (!contain) {
-                cache.Add(map);
+            if (contain) {
+                throw new ArgumentException($"mapping between {typeof(Source).Name} and {typeof(Target).Name} had been created");
             }
+            cache.Add(map);
+            return map;
         }
 
+        /// <summary>
+        /// 泛型缓存
+        /// </summary>
+        /// <typeparam name="Source"></typeparam>
+        /// <typeparam name="Target"></typeparam>
         private static class MapperLink<Source, Target> {
             private static readonly Func<Source, Target> converter;
             private static MappingProfile<Source, Target> profile;
             static MapperLink() {
                 //
-                profile = (MappingProfile<Source, Target>)cache.First(p => p.CheckExit(typeof(Source), typeof(Target)));
+                profile = (MappingProfile<Source, Target>)cache.FirstOrDefault(p => p.CheckExit(typeof(Source), typeof(Target)));
+                if (profile == null) {
+                    profile = internalCreate<Source, Target>();
+                    profile.AutoMap();
+                }
                 //
                 var flags = BindingFlags.Public | BindingFlags.Instance;
                 var parameter = Expression.Parameter(typeof(Source), "source");
