@@ -11,5 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Mapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MappingProfile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MappingRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiles.cs" />
   </ItemGroup>
 </Project>
