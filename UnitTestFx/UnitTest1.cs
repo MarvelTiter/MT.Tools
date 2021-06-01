@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shared.DataTableUtils.Core;
+using Shared.ReflectionUtils.Core;
 using System;
 using System.Data;
 using System.Linq;
@@ -17,6 +18,10 @@ namespace UnitTestFx {
             public int Age { get; set; }
             public bool IsSafe { get; set; }
             public Gender Gender { get; set; }
+
+            public void Update() {
+                Age += 1;
+            }
         }
 
         DataTable GetTable() {
@@ -55,7 +60,18 @@ namespace UnitTestFx {
         public void TestSelect() {
             var dt = GetTable();
             User[] user = dt.Select<User>(row => row.Value<int>("Age") > 22).ToArray();
-            Assert.AreEqual(user.Length,0);
+            Assert.AreEqual(user.Length, 0);
+        }
+
+        [TestMethod]
+        public void TestSetProperty() {
+            var user = new User();
+            user.Set("Name", "hello");
+            user.Set("Age", 18);
+            Assert.AreEqual(user.Name, "hello");
+            Assert.AreEqual(user.Age, 18);
+            user.Invoke("Update");
+            Assert.AreEqual(user.Age, 19);
         }
     }
 }
