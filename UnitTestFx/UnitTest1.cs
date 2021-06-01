@@ -4,8 +4,10 @@ using Shared.Mapper.Core;
 using Shared.ReflectionUtils.Core;
 using Shared.StringExtension;
 using System;
+using System.Collections;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 
 namespace UnitTestFx {
     [TestClass]
@@ -113,10 +115,10 @@ namespace UnitTestFx {
                 IsSafe = true,
                 Gender = Gender.Male
             };
-            UserDTO userDTO = Mapper.Map<User, UserDTO>(user);
             Mapper.CreateMap<User, UserDTO>(ctx => {
-                
+                ctx.Mapping(u => u.Name, u => new ArrayList { u.Name, u.Age });
             });
+            UserDTO userDTO = Mapper.Map<User, UserDTO>(user);
         }
     }
 }
