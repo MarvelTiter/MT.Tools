@@ -5,12 +5,14 @@ using System.Text;
 
 namespace Shared.Mapper.Core {
     public class MappingRule {
-        public MappingRule(MemberInfo[] sources, MemberInfo[] targets) {
-            Sources = sources;
-            Targets = targets;
+        public MappingRule(MemberInfo mapTo, MemberInfo[] mapFrom, string formatter) {
+            MapTo = mapTo;
+            MapFrom = mapFrom;
+            Formatter = formatter;
         }
+        public int Index { get; set; }
         public string Formatter { get; set; }
-        public MemberInfo[] Sources { get; set; }
-        public MemberInfo[] Targets { get; set; }
+        public MemberInfo MapTo { get; set; }
+        public MemberInfo[] MapFrom { get; set; }
     }
 }

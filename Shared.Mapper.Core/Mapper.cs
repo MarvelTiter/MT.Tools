@@ -22,11 +22,8 @@ namespace Shared.Mapper.Core {
         /// <param name="context"></param>
         public static void CreateMap<Source, Target>(Action<MappingProfile<Source, Target>> context = null) {
             var map = internalCreate<Source, Target>();
-            if (context == null) {
-                map.AutoMap();
-            } else {
-                context.Invoke(map);
-            }            
+            context?.Invoke(map);
+            map.AutoMap();
         }
         /// <summary>
         /// 创建 MappingProfile，并检查是否重复
@@ -60,45 +57,37 @@ namespace Shared.Mapper.Core {
                     profile.AutoMap();
                 }
                 //
-                var flags = BindingFlags.Public | BindingFlags.Instance;
                 var parameter = Expression.Parameter(typeof(Source), "source");
-                var members = typeof(Target).GetMembers(flags)
-                    .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property);
+                // get all field and property
+
                 List<MemberBinding> bindings = new List<MemberBinding>();
-                foreach (var member in members) {
-                    if (GetMappedFieldOrProperty(member, out var rule)) {
-                        Expression valueExp = GetValueExpression(parameter, rule);
-                        MemberAssignment bind = Expression.Bind(member, valueExp);
-                        bindings.Add(bind);
-                    }
+                foreach (var rule in profile.Rules) {
+                    Expression valueExp = GetValueExpression(parameter, rule);
+                    MemberAssignment bind = Expression.Bind(rule.MapTo, valueExp);
+                    bindings.Add(bind);
                 }
+
                 MemberInitExpression body = Expression.MemberInit(Expression.New(typeof(Target)), bindings);
                 Expression<Func<Source, Target>> lambda = Expression.Lambda<Func<Source, Target>>(body, parameter);
                 converter = lambda.Compile();
             }
 
             private static Expression GetValueExpression(ParameterExpression parameter, MappingRule rule) {
-                var member = rule.Targets;
+                var member = rule.MapFrom;
                 MemberExpression[] arr = new MemberExpression[member.Length];
                 for (int i = 0; i < member.Length; i++) {
                     var name = member[i].Name;
-                    arr[0] = Expression.PropertyOrField(parameter, name);
+                    arr[i] = Expression.PropertyOrField(parameter, name);
                 }
                 if (arr.Length == 1) return arr[0];
                 else {
-                    Expression expression = default;
                     MethodInfo formatMethod = typeof(string).GetMethod("Format", new Type[] { typeof(string), typeof(object[]) });
-                    List<Expression> param = new List<Expression>();
-                    param.Add(Expression.Constant(rule.Formatter));
-                    param.AddRange(arr.Select(Expression.Constant));
-                    expression = Expression.Call(null, formatMethod, param);
+                    ConstantExpression formatString = Expression.Constant(rule.Formatter);
+                    var unaries = arr.Select(e => Expression.Convert(e, typeof(object)));
+                    NewArrayExpression formatArgs = Expression.NewArrayInit(typeof(object), unaries);
+                    Expression expression = Expression.Call(null, formatMethod, formatString, formatArgs);
                     return expression;
                 }
-            }
-
-            private static bool GetMappedFieldOrProperty(MemberInfo member, out MappingRule rule) {
-                rule = profile.GetRule(member);
-                return rule != null;
             }
 
             public static Target Map(Source source) {

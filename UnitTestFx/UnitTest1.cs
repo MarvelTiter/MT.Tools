@@ -29,14 +29,10 @@ namespace UnitTestFx {
         }
 
         class UserDTO {
-            public string Name { get; set; }
-            public int Age { get; set; }
+            public string Label { get; set; }
             public bool IsSafe { get; set; }
             public Gender Gender { get; set; }
 
-            public void Update() {
-                Age += 1;
-            }
         }
 
         DataTable GetTable() {
@@ -116,7 +112,8 @@ namespace UnitTestFx {
                 Gender = Gender.Male
             };
             Mapper.CreateMap<User, UserDTO>(ctx => {
-                ctx.Mapping(u => u.Name, u => new ArrayList { u.Name, u.Age });
+                ctx.Mapping(u => u.Label, "{0}:{1}"
+                    , u => u.Name, u => u.Age);
             });
             UserDTO userDTO = Mapper.Map<User, UserDTO>(user);
         }
