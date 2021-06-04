@@ -8,7 +8,6 @@ using System.Text;
 namespace Shared.Mapper.Core {
     public static class Mapper {
 
-        private static IList<Profiles> cache = new List<Profiles>();
 
         public static Target Map<Source, Target>(Source source) {
             return MapperLink<Source, Target>.Map(source);
@@ -33,11 +32,7 @@ namespace Shared.Mapper.Core {
         /// <returns></returns>
         private static MappingProfile<Source, Target> internalCreate<Source, Target>() {
             var map = new MappingProfile<Source, Target>();
-            bool contain = cache.Any(p => p.CheckExit(typeof(Source), typeof(Target)));
-            if (contain) {
-                throw new ArgumentException($"mapping between {typeof(Source).Name} and {typeof(Target).Name} had been created");
-            }
-            cache.Add(map);
+            ProfileProvider.Cache(map, typeof(Source), typeof(Target));
             return map;
         }
 
@@ -48,13 +43,11 @@ namespace Shared.Mapper.Core {
         /// <typeparam name="Target"></typeparam>
         private static class MapperLink<Source, Target> {
             private static readonly Func<Source, Target> converter;
-            private static MappingProfile<Source, Target> profile;
             static MapperLink() {
                 //
-                profile = (MappingProfile<Source, Target>)cache.FirstOrDefault(p => p.CheckExit(typeof(Source), typeof(Target)));
+                var profile = ProfileProvider.GetProfile(typeof(Source), typeof(Target));
                 if (profile == null) {
                     profile = internalCreate<Source, Target>();
-                    profile.AutoMap();
                 }
                 //
                 var parameter = Expression.Parameter(typeof(Source), "source");

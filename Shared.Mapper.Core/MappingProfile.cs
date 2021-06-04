@@ -10,8 +10,7 @@ namespace Shared.Mapper.Core {
 
         private Type sourceType;
         private Type targetType;
-        public IList<MappingRule> Rules { get; private set; }
-        public IList<MappingRule> ReverseRules { get; private set; }
+        public override IList<MappingRule> Rules { get; }
 
         public MappingProfile() {
             sourceType = typeof(Source);
