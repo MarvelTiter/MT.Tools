@@ -16,7 +16,7 @@ namespace Shared.Mapper.Core {
         }
 
         public static Profiles GetProfile(Type sourceType, Type targetType) {
-            return cache.First(p => p.CheckExit(sourceType, targetType));
+            return cache.FirstOrDefault(p => p.CheckExit(sourceType, targetType));
         }
     }
 }

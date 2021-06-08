@@ -77,5 +77,16 @@ namespace Shared.Mapper.Core {
             MappingRule rule = new MappingRule(to, from, formatter);
             Rules.Add(rule);
         }
+
+        public override Direction GetDirection(Type source, Type target) {
+            if (ReferenceEquals(sourceType, source) && ReferenceEquals(targetType, target)) {
+                return Direction.Forward;
+                ;
+            }
+            else if(ReferenceEquals(sourceType, target) && ReferenceEquals(targetType, source)) {
+                return Direction.Backward;
+            }
+            throw new ArgumentException($"TypeError 1. {source.Name} 2. {target.Name}");
+        }
     }
 }
