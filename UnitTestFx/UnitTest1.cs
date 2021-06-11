@@ -116,9 +116,9 @@ namespace UnitTestFx {
             //    ctx.Mapping(u => u.Label, "{0}:{1}"
             //        , u => u.Name, u => u.Age);
             //});
-            var userDTO = Mapper.Map<User, UserDTO>(user);
+            //var userDTO = Mapper.Map<User, UserDTO>(user);
 
-            //var userDTO = Mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(null);
+            var userDTO = Mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(null);
         }
     }
 }

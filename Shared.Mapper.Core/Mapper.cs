@@ -1,5 +1,6 @@
 ﻿using Shared.ReflectionUtils.Core;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -52,11 +53,10 @@ namespace Shared.Mapper.Core {
                 // 
                 Type sourceType = typeof(Source);
                 Type targetType = typeof(Target);
-                if (sourceType.IsGenericType) {
+                if (sourceType.IsGenericType|| sourceType.IsArray) {
                     var sf = sourceType.GenericTypeArguments;
                     var tf = targetType.GenericTypeArguments;
-                    Type type = typeof(MapperLink<,>);
-                    type.MakeGenericType(sf[0], tf[0]);                    
+                    Type type = typeof(MapperLink<,>).MakeGenericType(sf[0], tf[0]);
                 }
 
                 var profile = ProfileProvider.GetProfile(sourceType, targetType);
