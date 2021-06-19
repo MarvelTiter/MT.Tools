@@ -21,6 +21,14 @@ namespace Shared.DataTableUtils.Core {
             cache.TryGetValue(type, out var func);
             return func;
         }
+
+        /// <summary>
+        /// 创建 Type 对应的 DataRow 转换委托并缓存
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="dataColumn"></param>
+        /// <param name="mustMapAll"></param>
+        /// <returns></returns>
         public static Func<DataRow, object> GetCreator(Type type, DataColumnCollection dataColumn, bool mustMapAll = false) {
             Func<DataRow, object> func = GetFunc(type);
             if (func == null) {
@@ -67,7 +75,6 @@ namespace Shared.DataTableUtils.Core {
                         if (mapAll) {
                             throw new ArgumentException($"Property {prop.Name} is not matched by any column in datatable");
                         }
-
                     }
                     work();
                 }
@@ -78,6 +85,7 @@ namespace Shared.DataTableUtils.Core {
             }
 
         }
+
         private static Expression GetTargetValueExpression(DataColumn column, ParameterExpression parameterExpression, Type targetType) {
             MethodCallExpression rowObjExp = Expression.Call(parameterExpression, Datarow_getItem, Expression.Constant(column.ColumnName));
             MethodCallExpression checkNullExp = Expression.Call(parameterExpression, DataRow_IsNull, Expression.Constant(column.ColumnName));
