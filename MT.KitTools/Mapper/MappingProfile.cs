@@ -12,7 +12,7 @@ namespace MT.KitTools.Mapper {
         private Type targetType;
         public override IList<MappingRule> Rules { get; }
 
-        public MappingProfile() {
+        internal MappingProfile() {
             sourceType = typeof(Source);
             targetType = typeof(Target);
             Rules = new List<MappingRule>();
