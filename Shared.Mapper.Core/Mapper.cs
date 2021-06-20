@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Shared.ReflectionUtils.Core;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,9 +10,11 @@ using System.Text;
 namespace Shared.Mapper.Core {
     public static class Mapper {
 
-        private static IList<Profiles> cache = new List<Profiles>();
 
         public static Target Map<Source, Target>(Source source) {
+            //Type type = typeof(MapperLink<,>);
+            //type = type.MakeGenericType(typeof(Source), typeof(Target));
+            //return type.Invoke<Target>("Map", source);
             return MapperLink<Source, Target>.Map(source);
         }
 
@@ -22,11 +26,8 @@ namespace Shared.Mapper.Core {
         /// <param name="context"></param>
         public static void CreateMap<Source, Target>(Action<MappingProfile<Source, Target>> context = null) {
             var map = internalCreate<Source, Target>();
-            if (context == null) {
-                map.AutoMap();
-            } else {
-                context.Invoke(map);
-            }            
+            context?.Invoke(map);
+            map.AutoMap();
         }
         /// <summary>
         /// 创建 MappingProfile，并检查是否重复
@@ -34,13 +35,10 @@ namespace Shared.Mapper.Core {
         /// <typeparam name="Source"></typeparam>
         /// <typeparam name="Target"></typeparam>
         /// <returns></returns>
-        private static MappingProfile<Source, Target> internalCreate<Source, Target>() {
+        private static MappingProfile<Source, Target> internalCreate<Source, Target>(bool autoMap = false) {
             var map = new MappingProfile<Source, Target>();
-            bool contain = cache.Any(p => p.CheckExit(typeof(Source), typeof(Target)));
-            if (contain) {
-                throw new ArgumentException($"mapping between {typeof(Source).Name} and {typeof(Target).Name} had been created");
-            }
-            cache.Add(map);
+            ProfileProvider.Cache(map, typeof(Source), typeof(Target));
+            if (autoMap) map.AutoMap();
             return map;
         }
 
@@ -51,54 +49,76 @@ namespace Shared.Mapper.Core {
         /// <typeparam name="Target"></typeparam>
         private static class MapperLink<Source, Target> {
             private static readonly Func<Source, Target> converter;
-            private static MappingProfile<Source, Target> profile;
             static MapperLink() {
-                //
-                profile = (MappingProfile<Source, Target>)cache.FirstOrDefault(p => p.CheckExit(typeof(Source), typeof(Target)));
+                // 
+                Type sourceType = typeof(Source);
+                Type targetType = typeof(Target);
+                if (sourceType.IsGenericType|| sourceType.IsArray) {
+                    var sf = sourceType.GenericTypeArguments;
+                    var tf = targetType.GenericTypeArguments;
+                    Type type = typeof(MapperLink<,>).MakeGenericType(sf[0], tf[0]);
+                }
+
+                var profile = ProfileProvider.GetProfile(sourceType, targetType);
                 if (profile == null) {
-                    profile = internalCreate<Source, Target>();
-                    profile.AutoMap();
+                    profile = internalCreate<Source, Target>(true);
                 }
                 //
-                var flags = BindingFlags.Public | BindingFlags.Instance;
-                var parameter = Expression.Parameter(typeof(Source), "source");
-                var members = typeof(Target).GetMembers(flags)
-                    .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property);
+                var parameter = Expression.Parameter(sourceType, "source");
+                // get all field and property
+
                 List<MemberBinding> bindings = new List<MemberBinding>();
-                foreach (var member in members) {
-                    if (GetMappedFieldOrProperty(member, out var rule)) {
-                        Expression valueExp = GetValueExpression(parameter, rule);
-                        MemberAssignment bind = Expression.Bind(member, valueExp);
-                        bindings.Add(bind);
-                    }
-                }
-                MemberInitExpression body = Expression.MemberInit(Expression.New(typeof(Target)), bindings);
+                var direction = profile.GetDirection(sourceType, targetType);
+                if (direction == Direction.Forward)
+                    forwardBindings(ref bindings, parameter, profile.Rules);
+                else
+                    backwardBindings(ref bindings, parameter, profile.Rules);
+
+                MemberInitExpression body = Expression.MemberInit(Expression.New(targetType), bindings);
                 Expression<Func<Source, Target>> lambda = Expression.Lambda<Func<Source, Target>>(body, parameter);
                 converter = lambda.Compile();
+
+                void forwardBindings(ref List<MemberBinding> memberBindings, ParameterExpression parameterExpression, IList<MappingRule> rules) {
+                    foreach (var rule in rules) {
+                        Expression valueExp = GetForwardValueExpression(parameterExpression, rule);
+                        MemberAssignment bind = Expression.Bind(rule.MapTo, valueExp);
+                        memberBindings.Add(bind);
+                    }
+                }
+
+                void backwardBindings(ref List<MemberBinding> memberBindings, ParameterExpression parameterExpression, IList<MappingRule> rules) {
+                    foreach (var rule in rules) {
+                        Expression[] valueExpArray = GetBackwardValueExpressions(parameterExpression, rule);
+                        for (int i = 0; i < valueExpArray.Length; i++) {
+                            var valueExp = valueExpArray[i];
+                            var member = rule.MapFrom[i];
+                            MemberAssignment bind = Expression.Bind(member, valueExp);
+                            memberBindings.Add(bind);
+                        }
+                    }
+                }
             }
 
-            private static Expression GetValueExpression(ParameterExpression parameter, MappingRule rule) {
-                var member = rule.Targets;
+            private static Expression GetForwardValueExpression(ParameterExpression parameter, MappingRule rule) {
+                var member = rule.MapFrom;
                 MemberExpression[] arr = new MemberExpression[member.Length];
                 for (int i = 0; i < member.Length; i++) {
                     var name = member[i].Name;
-                    arr[0] = Expression.PropertyOrField(parameter, name);
+                    arr[i] = Expression.PropertyOrField(parameter, name);
                 }
                 if (arr.Length == 1) return arr[0];
                 else {
-                    Expression expression = default;
                     MethodInfo formatMethod = typeof(string).GetMethod("Format", new Type[] { typeof(string), typeof(object[]) });
-                    List<Expression> param = new List<Expression>();
-                    param.Add(Expression.Constant(rule.Formatter));
-                    param.AddRange(arr.Select(Expression.Constant));
-                    expression = Expression.Call(null, formatMethod, param);
+                    ConstantExpression formatString = Expression.Constant(rule.Formatter);
+                    var unaries = arr.Select(e => Expression.Convert(e, typeof(object)));
+                    NewArrayExpression formatArgs = Expression.NewArrayInit(typeof(object), unaries);
+                    Expression expression = Expression.Call(null, formatMethod, formatString, formatArgs);
                     return expression;
                 }
             }
 
-            private static bool GetMappedFieldOrProperty(MemberInfo member, out MappingRule rule) {
-                rule = profile.GetRule(member);
-                return rule != null;
+            private static Expression[] GetBackwardValueExpressions(ParameterExpression parameter, MappingRule rule) {
+                throw new NotImplementedException();
             }
 
             public static Target Map(Source source) {

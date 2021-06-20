@@ -37,6 +37,30 @@ namespace Shared.ReflectionUtils.Core {
         }
 
         /// <summary>
+        /// 根据类型调用静态方法
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="methodName"></param>
+        /// <param name="args"></param>
+        public static void Invoke(this Type type,string methodName,params object[] args) {
+            var method = type.GetMethod(methodName, args.Select(o => o.GetType()).ToArray());
+            MethodCallExpression methodCallExpression = Expression.Call(method, args.Select(Expression.Constant));
+            Expression.Lambda(methodCallExpression).Compile().DynamicInvoke();
+        }
+
+        /// <summary>
+        /// 根据类型调用静态方法(有返回值)
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="methodName"></param>
+        /// <param name="args"></param>
+        public static T Invoke<T>(this Type type, string methodName, params object[] args) {
+            var method = type.GetMethod(methodName, args.Select(o => o.GetType()).ToArray());
+            MethodCallExpression methodCallExpression = Expression.Call(method, args.Select(Expression.Constant));
+            return (T)Expression.Lambda(methodCallExpression).Compile().DynamicInvoke();
+        }
+
+        /// <summary>
         /// 设置属性的值
         /// </summary>
         /// <typeparam name="T"></typeparam>

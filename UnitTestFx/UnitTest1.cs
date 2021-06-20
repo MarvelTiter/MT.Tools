@@ -5,6 +5,7 @@ using Shared.ReflectionUtils.Core;
 using Shared.StringExtension;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -29,14 +30,10 @@ namespace UnitTestFx {
         }
 
         class UserDTO {
-            public string Name { get; set; }
-            public int Age { get; set; }
+            public string Label { get; set; }
             public bool IsSafe { get; set; }
             public Gender Gender { get; set; }
 
-            public void Update() {
-                Age += 1;
-            }
         }
 
         DataTable GetTable() {
@@ -115,10 +112,13 @@ namespace UnitTestFx {
                 IsSafe = true,
                 Gender = Gender.Male
             };
-            Mapper.CreateMap<User, UserDTO>(ctx => {
-                ctx.Mapping(u => u.Name, u => new ArrayList { u.Name, u.Age });
-            });
-            UserDTO userDTO = Mapper.Map<User, UserDTO>(user);
+            //Mapper.CreateMap<User, UserDTO>(ctx => {
+            //    ctx.Mapping(u => u.Label, "{0}:{1}"
+            //        , u => u.Name, u => u.Age);
+            //});
+            //var userDTO = Mapper.Map<User, UserDTO>(user);
+
+            var userDTO = Mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(null);
         }
     }
 }
