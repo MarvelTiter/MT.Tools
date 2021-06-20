@@ -1,13 +1,10 @@
-﻿using Shared.ReflectionUtils.Core;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 
-namespace Shared.Mapper.Core {
+namespace MT.KitTools.Mapper {
     public static class Mapper {
 
 
@@ -53,7 +50,7 @@ namespace Shared.Mapper.Core {
                 // 
                 Type sourceType = typeof(Source);
                 Type targetType = typeof(Target);
-                if (sourceType.IsGenericType|| sourceType.IsArray) {
+                if (sourceType.IsGenericType || sourceType.IsArray) {
                     var sf = sourceType.GenericTypeArguments;
                     var tf = targetType.GenericTypeArguments;
                     Type type = typeof(MapperLink<,>).MakeGenericType(sf[0], tf[0]);

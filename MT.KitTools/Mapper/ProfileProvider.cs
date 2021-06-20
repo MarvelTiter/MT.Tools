@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Shared.Mapper.Core {
+namespace MT.KitTools.Mapper {
     public static class ProfileProvider {
         private static IList<Profiles> cache = new List<Profiles>();
 

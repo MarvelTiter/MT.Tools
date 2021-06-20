@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace Shared.DataTableUtils.Core {
+namespace MT.KitTools.DataTableExtension {
     public class DataTableBuilder {
         private static Dictionary<Type, Func<DataRow, object>> cache;
 
@@ -36,7 +36,7 @@ namespace Shared.DataTableUtils.Core {
                 List<MemberBinding> bindings = new List<MemberBinding>();
                 // fields
                 var fields = type1.GetFields(BindingFlags.Public | BindingFlags.Instance);
-                foreach (FieldInfo field in fields) {                   
+                foreach (FieldInfo field in fields) {
                     void work() {
                         if (cols.Contains(field.Name)) {
                             DataColumn col = cols[field.Name];
@@ -104,7 +104,7 @@ namespace Shared.DataTableUtils.Core {
             } else if (ReferenceEquals(targetType, typeof(bool))) {
                 MethodInfo ToBooleanMethod = typeof(Convert).GetMethod("ToBoolean", new[] { sourceType });
                 return Expression.Call(ToBooleanMethod, source);
-            } else if (ReferenceEquals(sourceType, typeof(Byte[]))) {
+            } else if (ReferenceEquals(sourceType, typeof(byte[]))) {
                 return GetArrayHandlerExpression(source, targetType);
             } else {
                 return Expression.Convert(source, targetType);
@@ -112,10 +112,10 @@ namespace Shared.DataTableUtils.Core {
         }
 
         private static Expression GetArrayHandlerExpression(Expression sourceExpression, Type targetType) {
-            Expression TargetExpression = default(Expression);
-            if (object.ReferenceEquals(targetType, typeof(byte[]))) {
+            Expression TargetExpression = default;
+            if (ReferenceEquals(targetType, typeof(byte[]))) {
                 TargetExpression = sourceExpression;
-            } else if (object.ReferenceEquals(targetType, typeof(MemoryStream))) {
+            } else if (ReferenceEquals(targetType, typeof(MemoryStream))) {
                 ConstructorInfo ConstructorInfo = targetType.GetConstructor(new[] { typeof(byte[]) });
                 TargetExpression = Expression.New(ConstructorInfo, sourceExpression);
             } else {
@@ -131,7 +131,7 @@ namespace Shared.DataTableUtils.Core {
                 //Enum.Parse returns an object that needs to be unboxed
                 return Expression.Unbox(ParsedEnumExpression, TargetType);
             } else {
-                Expression ParseExpression = default(Expression);
+                Expression ParseExpression = default;
                 switch (UnderlyingType.FullName) {
                     case "System.Byte":
                     case "System.UInt16":

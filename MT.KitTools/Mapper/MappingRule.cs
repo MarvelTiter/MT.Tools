@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace Shared.Mapper.Core {
+namespace MT.KitTools.Mapper {
     public class MappingRule {
         public MappingRule(MemberInfo mapTo, MemberInfo[] mapFrom, string formatter) {
             MapTo = mapTo;

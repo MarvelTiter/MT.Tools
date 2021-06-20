@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
-using System.Linq.Expressions;
 
-namespace Shared.DataTableUtils.Core {
+namespace MT.KitTools.DataTableExtension {
     public static class DataTableHelper {
         public static bool HasRows(this DataTable dt) {
             return dt != null && dt.Rows.Count > 0;

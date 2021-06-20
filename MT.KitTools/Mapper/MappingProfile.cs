@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace Shared.Mapper.Core {
+namespace MT.KitTools.Mapper {
     public class MappingProfile<Source, Target> : Profiles {
 
         private Type sourceType;
@@ -49,8 +49,8 @@ namespace Shared.Mapper.Core {
         }
 
         public override bool CheckExit(Type source, Type target) {
-            return (ReferenceEquals(sourceType, source) && ReferenceEquals(targetType, target)) ||
-                (ReferenceEquals(sourceType, target) && ReferenceEquals(targetType, source));
+            return ReferenceEquals(sourceType, source) && ReferenceEquals(targetType, target) ||
+                ReferenceEquals(sourceType, target) && ReferenceEquals(targetType, source);
         }
 
         private MemberInfo[] ResolveMapFromMemberInfo(params Expression<Func<Source, object>>[] mapFromExp) {
@@ -82,8 +82,7 @@ namespace Shared.Mapper.Core {
             if (ReferenceEquals(sourceType, source) && ReferenceEquals(targetType, target)) {
                 return Direction.Forward;
                 ;
-            }
-            else if(ReferenceEquals(sourceType, target) && ReferenceEquals(targetType, source)) {
+            } else if (ReferenceEquals(sourceType, target) && ReferenceEquals(targetType, source)) {
                 return Direction.Backward;
             }
             throw new ArgumentException($"TypeError 1. {source.Name} 2. {target.Name}");
