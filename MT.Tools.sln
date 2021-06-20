@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Strings", "Strings", "{F3C1
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared.StringExtension", "Shared.StringExtension\Shared.StringExtension.shproj", "{11D11DE8-AA2A-4770-94C4-3FE1CB2B4654}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MT.KitTools", "MT.KitTools\MT.KitTools.csproj", "{954954F0-04FA-4398-8F5A-223BF52EB89B}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Shared.StringExtension\Shared.StringExtension.projitems*{11d11de8-aa2a-4770-94c4-3fe1cb2b4654}*SharedItemsImports = 13
@@ -47,6 +49,10 @@ Global
 		{E9495236-4958-476B-905F-1171A5F32950}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9495236-4958-476B-905F-1171A5F32950}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9495236-4958-476B-905F-1171A5F32950}.Release|Any CPU.Build.0 = Release|Any CPU
+		{954954F0-04FA-4398-8F5A-223BF52EB89B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{954954F0-04FA-4398-8F5A-223BF52EB89B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{954954F0-04FA-4398-8F5A-223BF52EB89B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{954954F0-04FA-4398-8F5A-223BF52EB89B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
