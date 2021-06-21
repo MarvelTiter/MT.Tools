@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Shared.StringExtension {
+namespace MT.KitTools.StringExtension {
     public static class StringExtensions {
 
         public static bool IsLegal(this string self, Func<string, bool> rule = null) {

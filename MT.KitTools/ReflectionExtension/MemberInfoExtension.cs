@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 
-namespace Shared.ReflectionUtils.Core {
+namespace MT.KitTools.ReflectionExtension {
     public static class MemberInfoExtension {
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Shared.ReflectionUtils.Core {
         /// <param name="type"></param>
         /// <param name="methodName"></param>
         /// <param name="args"></param>
-        public static void Invoke(this Type type,string methodName,params object[] args) {
+        public static void Invoke(this Type type, string methodName, params object[] args) {
             var method = type.GetMethod(methodName, args.Select(o => o.GetType()).ToArray());
             MethodCallExpression methodCallExpression = Expression.Call(method, args.Select(Expression.Constant));
             Expression.Lambda(methodCallExpression).Compile().DynamicInvoke();
@@ -88,7 +88,7 @@ namespace Shared.ReflectionUtils.Core {
 
         public static void Set<T>(this object self, string propName, T value) {
             var prop = self.GetType().GetProperty(propName);
-            self.Set<T>(prop, value);
+            self.Set(prop, value);
         }
     }
 }
