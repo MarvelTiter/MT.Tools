@@ -59,6 +59,12 @@ namespace MT.KitTools.ReflectionExtension {
             MethodCallExpression methodCallExpression = Expression.Call(method, args.Select(Expression.Constant));
             return (T)Expression.Lambda(methodCallExpression).Compile().DynamicInvoke();
         }
+        public static object Invoke(this Type type, Type genericType, string methodName, params object[] args) {
+            var method = type.GetMethod(methodName, args.Select(o => o.GetType()).ToArray());
+            method = method.MakeGenericMethod(genericType);
+            MethodCallExpression methodCallExpression = Expression.Call(method, args.Select(Expression.Constant));
+            return Expression.Lambda(methodCallExpression).Compile().DynamicInvoke();
+        }
 
         /// <summary>
         /// 设置属性的值

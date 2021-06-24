@@ -10,40 +10,37 @@ namespace MT.KitTools.Mapper {
 
         private Type sourceType;
         private Type targetType;
+
+        private Type sourceElementType;
+        private Type targetElementType;
+
+        private bool isCollection;
+
         public override IList<MappingRule> Rules { get; }
 
-        internal MappingProfile() {
+        private IList<Action<Source, Target>> actions;
+        private readonly MapperConfig mapperConfig;
+
+        internal MappingProfile(MapperConfig mapperConfig) {
             sourceType = typeof(Source);
             targetType = typeof(Target);
             Rules = new List<MappingRule>();
+            actions = new List<Action<Source, Target>>();
+            this.mapperConfig = mapperConfig;
         }
 
-        public MappingProfile<Source, Target> Mapping(
-            Expression<Func<Target, object>> mapToExp
-            , Expression<Func<Source, object>> mapFromExp) {
-            MemberInfo to = ResolveMapToMemberInfo(mapToExp.Body);
-            MemberInfo[] from = ResolveMapFromMemberInfo(mapFromExp);
-            AddMap(to, from);
-            return this;
-        }
-
-        public MappingProfile<Source, Target> Mapping(
-              Expression<Func<Target, object>> mapToExp
-            , string formatter
-            , params Expression<Func<Source, object>>[] mapFromExp) {
-            MemberInfo to = ResolveMapToMemberInfo(mapToExp.Body);
-            MemberInfo[] from = ResolveMapFromMemberInfo(mapFromExp);
-            AddMap(to, from, formatter);
+        public MappingProfile<Source, Target> Mapping(Action<Source, Target> action) {
+            actions.Add(action);
             return this;
         }
 
         public void AutoMap() {
             var BindingAttr = BindingFlags.Public | BindingFlags.Instance;
-            var members = targetType.GetMembers(BindingAttr)
-                .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property);
-            foreach (var item in members) {
-                var sourceMember = sourceType.GetMember(item.Name, MemberTypes.Field | MemberTypes.Property, BindingAttr);
-                if (!Rules.Any(r => r.MapTo == item) && sourceMember.Length > 0)
+            var targetProps = targetType.GetProperties(BindingAttr);
+            var sourceProps = sourceType.GetProperties(BindingAttr);
+            foreach (var item in targetProps) {
+                var sourceMember = sourceProps.FirstOrDefault(p => mapperConfig.Match(p, item));
+                if (!Rules.Any(r => r.MapTo == item) && sourceMember != null)
                     AddMap(item, sourceMember);
             }
         }
@@ -53,27 +50,7 @@ namespace MT.KitTools.Mapper {
                 ReferenceEquals(sourceType, target) && ReferenceEquals(targetType, source);
         }
 
-        private MemberInfo[] ResolveMapFromMemberInfo(params Expression<Func<Source, object>>[] mapFromExp) {
-            return mapFromExp.Select(exp => {
-                return GetMemberInfo(exp.Body);
-            }).ToArray();
-        }
-
-        private MemberInfo GetMemberInfo(Expression body) {
-            if (body is MemberExpression member) {
-                return member.Member;
-            } else if (body is UnaryExpression unary) {
-                MemberExpression uMember = unary.Operand as MemberExpression;
-                return uMember.Member;
-            }
-            return null;
-        }
-
-        private MemberInfo ResolveMapToMemberInfo(Expression body) {
-            return GetMemberInfo(body);
-        }
-
-        private void AddMap(MemberInfo to, MemberInfo[] from, string formatter = null) {
+        private void AddMap(PropertyInfo to, PropertyInfo from, string formatter = null) {
             MappingRule rule = new MappingRule(to, from, formatter);
             Rules.Add(rule);
         }
@@ -86,6 +63,14 @@ namespace MT.KitTools.Mapper {
                 return Direction.Backward;
             }
             throw new ArgumentException($"TypeError 1. {source.Name} 2. {target.Name}");
+        }
+
+        public override void RunActions(object source, object target) {
+            var s = (Source)source;
+            var t = (Target)target;
+            foreach (var item in actions) {
+                item.Invoke(s, t);
+            }
         }
     }
 }
