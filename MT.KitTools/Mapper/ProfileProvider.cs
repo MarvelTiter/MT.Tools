@@ -16,7 +16,8 @@ namespace MT.KitTools.Mapper {
         }
 
         public static Profiles GetProfile(Type sourceType, Type targetType) {
-            return cache.FirstOrDefault(p => p.CheckExit(sourceType, targetType));
+            var profile = cache.FirstOrDefault(p => p.CheckExit(sourceType, targetType));
+            return profile;
         }
     }
 }

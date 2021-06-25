@@ -24,12 +24,12 @@ namespace KitTools.Test {
                 fileStream.Read(avatarBytes, 0, (int)length);
             }
 
-            Mapper.Configuration(config => {
+            Mapper.Default.Configuration(config => {
                 config.StringComparison = System.StringComparison.OrdinalIgnoreCase | System.StringComparison.CurrentCulture;
                 config.EnablePrefixMatch("TEST_");
             });
 
-            Mapper.CreateMap<User, UserDTO>(profile => {
+            Mapper.Default.CreateMap<User, UserDTO>(profile => {
                 profile.Mapping((u, ut) => {
                     ut.NA = $"{u.Name} => {u.Age}";
                 });
@@ -42,14 +42,14 @@ namespace KitTools.Test {
 
         [Test]
         public void AutoMap() {
-            var ud = Mapper.Map<User, UserDTO>(user);
+            var ud = user.Map<User, UserDTO>();
             Assert.IsTrue(user.Address == ud.Address);
             Assert.IsTrue(user.Avatar.Length == ud.Avatar.Length);
         }
 
         [Test]
         public void RuleMap() {
-            var ud = Mapper.Map<User, UserDTO>(user);
+            var ud = user.Map<User, UserDTO>();
             Assert.IsTrue(ud.NA == $"{user.Name} => {user.Age}");
         }
 
