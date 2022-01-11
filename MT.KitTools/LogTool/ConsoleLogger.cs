@@ -6,6 +6,11 @@ namespace MT.KitTools.LogTool
     {
         public LogConfig LogConfig { get; set; }
 
+        public void Dispose()
+        {
+
+        }
+
         public void WriteLog(LogInfo logInfo)
         {
 

@@ -11,6 +11,7 @@ namespace MT.KitTools.LogTool
         private static LogConfig logConfig;
         public static void Config(Action<LogConfig> action)
         {
+            logConfig = new LogConfig();
             action?.Invoke(logConfig);
         }
         public static void Enable(LogType logType)
@@ -26,12 +27,30 @@ namespace MT.KitTools.LogTool
                     LoggerDict.Add("File", new FileLogger());
             }
         }
-
         public static void Enable(string key, ILogger logger)
         {
             if (LoggerDict.ContainsKey(key))
                 throw new Exception($"key {key} already exit");
             LoggerDict.Add(key, logger);
+        }
+        public static void Disable(LogType logType)
+        {
+            if (logType.HasFlag(LogType.Console))
+            {
+                LoggerDict.Remove("Console");
+            }
+            if (logType.HasFlag(LogType.File))
+            {
+                var logger = LoggerDict["File"];
+                logger.Dispose();
+                LoggerDict.Remove("File");
+            }
+        }
+        public static void Disable(string key)
+        {
+            var logger = LoggerDict[key];
+            logger.Dispose();
+            LoggerDict.Remove(key);
         }
 
         public static event Action<LogInfo> OnLog;

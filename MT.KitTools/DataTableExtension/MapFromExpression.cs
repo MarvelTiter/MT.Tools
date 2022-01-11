@@ -10,11 +10,9 @@ using System.Threading.Tasks;
 
 namespace MT.KitTools.DataTableExtension
 {
-    public static class MapExpression<T>
+    public static class MapFromExpression<T>
     {
         static Dictionary<string, Action<T, DataRow>> actions = new Dictionary<string, Action<T, DataRow>>();
-        private static MethodInfo Datarow_getItem = typeof(DataRow).GetMethod("get_Item", new Type[] { typeof(string) });
-        private static MethodInfo DataRow_IsNull = typeof(DataRow).GetMethod("IsNull", new Type[] { typeof(string) });
         public static Action<T, DataRow> Build(DataColumnCollection cols)
         {
             var columnNames = from col in cols.Cast<DataColumn>()
@@ -24,6 +22,13 @@ namespace MT.KitTools.DataTableExtension
             {
                 return action;
             }
+            action = CreateAction(cols);
+            actions.Add(key, action);
+            return action;
+        }
+
+        private static Action<T, DataRow> CreateAction(DataColumnCollection cols)
+        {
             ParameterExpression rowExp = Expression.Parameter(typeof(DataRow), "row");
             ParameterExpression tarExp = Expression.Parameter(typeof(T), "tar");
             var tarType = typeof(T);
@@ -35,45 +40,15 @@ namespace MT.KitTools.DataTableExtension
                 var prop = props.FirstOrDefault(p => p.Name.ToLower() == col.ColumnName.ToLower());
                 if (prop != null && prop.CanWrite)
                 {
-                    var valueExp = GetTargetValueExpression(col, rowExp, prop.PropertyType);
+                    var valueExp = TableExpressionBase.GetTargetValueExpression(col, rowExp, prop.PropertyType);
                     MethodCallExpression propAssign = Expression.Call(tarExp, prop.SetMethod, valueExp);
                     body.Add(propAssign);
                 }
             }
             var block = Expression.Block(body);
             var lambda = Expression.Lambda<Action<T, DataRow>>(block, tarExp, rowExp);
-            action = lambda.Compile();
-            actions.Add(key, action);
-            return action;
+            return lambda.Compile();
         }
 
-        private static Expression GetTargetValueExpression(DataColumn column, ParameterExpression parameterExpression, Type targetType)
-        {
-            MethodCallExpression rowObjExp = Expression.Call(parameterExpression, Datarow_getItem, Expression.Constant(column.ColumnName));
-            MethodCallExpression checkNullExp = Expression.Call(parameterExpression, DataRow_IsNull, Expression.Constant(column.ColumnName));
-            Expression e;
-            Type t = column.DataType;
-            if (targetType != typeof(byte[]))
-            {
-                e = Expression.Call(rowObjExp, typeof(object).GetMethod("ToString", Type.EmptyTypes));
-                t = typeof(string);
-            }
-            else
-                e = rowObjExp;
-            Expression realValueExp = DataTypeConvert.GetConversionExpression(e, t, targetType);
-            if (column.AllowDBNull)
-            {
-                return Expression.Condition(
-                    checkNullExp,
-                    Expression.Default(targetType),
-                    realValueExp,
-                    targetType
-                    );
-            }
-            else
-            {
-                return realValueExp;
-            }
-        }
     }
 }

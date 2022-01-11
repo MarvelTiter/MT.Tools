@@ -3,12 +3,15 @@
 using MT.KitTools.LogTool;
 
 Logger.Enable(LogType.Console | LogType.File);
-Logger.Info("info");
-Logger.Error("error");
-Logger.Fatal("fatal");
-Logger.Debug("debug");
-Logger.Info("info");
-Logger.Info("info");
-Logger.Info("info");
-Logger.Warn("警告");
+for (int i = 0; i < 10; i++)
+{
+    Logger.Warn($"测试{i}");
+    Task.Delay(1000).Wait();
+}
+Logger.Disable(LogType.File);
+for (int i = 0; i < 10; i++)
+{
+    Logger.Warn($"测试{i}");
+    Task.Delay(1000).Wait();
+}
 Console.Read();

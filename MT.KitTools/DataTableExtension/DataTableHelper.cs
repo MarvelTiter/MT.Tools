@@ -45,7 +45,7 @@ namespace MT.KitTools.DataTableExtension
         public static T Parse<T>(this DataRow row, bool mapAllFields)
         {
             var columns = row.Table.Columns;
-            var func = DataTableBuilder.GetCreator(typeof(T), columns, mapAllFields);
+            var func = DataTableBuilder<T>.Build(columns, mapAllFields);
             return (T)func.Invoke(row);
         }
 
@@ -67,7 +67,7 @@ namespace MT.KitTools.DataTableExtension
 
         public static void MapFromTable<T>(this T self, DataTable source)
         {
-            var action = MapExpression<T>.Build(source.Columns);
+            var action = MapFromExpression<T>.Build(source.Columns);
             action?.Invoke(self, source.Rows[0]);
         }
     }

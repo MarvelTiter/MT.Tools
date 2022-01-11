@@ -16,6 +16,7 @@ namespace MT.KitTools.LogTool
         static readonly ConcurrentQueue<(string, string)> logQueue = new ConcurrentQueue<(string, string)>();
         private AutoResetEvent Pause => new AutoResetEvent(false);
         private string separator = "----------------------------------------------------------------------------------------------------------------------";
+        CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
         public FileLogger()
         {
             var writeTask = new Task(obj =>
@@ -51,7 +52,7 @@ namespace MT.KitTools.LogTool
                         WriteText(item[0], item[1]);
                     }
                 }
-            }, null, TaskCreationOptions.LongRunning);
+            }, null, CancellationTokenSource.Token, TaskCreationOptions.LongRunning);
             writeTask.Start();
         }
 
@@ -117,6 +118,11 @@ namespace MT.KitTools.LogTool
             {
                 // ignored
             }
+        }
+
+        public void Dispose()
+        {
+            CancellationTokenSource.Cancel();
         }
     }
 }
