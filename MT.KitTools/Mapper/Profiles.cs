@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MT.KitTools.Mapper {
     public abstract class Profiles {
-        public abstract bool CheckExit(Type source, Type target);
+        public abstract bool Exit(Type source, Type target);
         public abstract IList<MappingRule> Rules { get; }
         public abstract Delegate CreateDelegate();
     }

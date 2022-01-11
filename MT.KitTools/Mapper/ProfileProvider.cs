@@ -8,7 +8,7 @@ namespace MT.KitTools.Mapper {
         private static IList<Profiles> cache = new List<Profiles>();
 
         public static void Cache(Profiles profiles, Type sourceType, Type targetType) {
-            bool contain = cache.Any(p => p.CheckExit(sourceType, targetType));
+            bool contain = cache.Any(p => p.Exit(sourceType, targetType));
             if (!contain) {
                 cache.Add(profiles);
                 //throw new ArgumentException($"mapping between {sourceType.Name} and {targetType.Name} had been created");
@@ -16,7 +16,7 @@ namespace MT.KitTools.Mapper {
         }
 
         public static Profiles GetProfile(Type sourceType, Type targetType) {
-            var profile = cache.FirstOrDefault(p => p.CheckExit(sourceType, targetType));
+            var profile = cache.FirstOrDefault(p => p.Exit(sourceType, targetType));
             return profile;
         }
     }

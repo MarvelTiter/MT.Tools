@@ -13,13 +13,20 @@ using System.Text.RegularExpressions;
 namespace MT.KitTools.Mapper {
 
     public static class MapperExtensions {
-        public static Target Map<Source, Target>(this Source source) {
-            return Mapper.Default.Map<Source, Target>(source);
-        }
+        
+
+        
     }
 
     public class Mapper {
-
+        public static Target Map<Source, Target>(Source source) {
+            return Default.InnerMap<Source, Target>(source);
+        }
+        public static IEnumerable<Target> Map<Source, Target>(IEnumerable<Source> sources) {
+            foreach (var item in sources) {
+                yield return Map<Source, Target>(item);
+            }
+        }
         public static Mapper Default => new Mapper();
 
         private MapperConfig Config => new MapperConfig();
@@ -49,11 +56,10 @@ namespace MT.KitTools.Mapper {
         private static MappingProfile<Source, Target> CreateProfile<Source, Target>() {
             var map = new MappingProfile<Source, Target>();
             ProfileProvider.Cache(map, typeof(Source), typeof(Target));
-            map.AutoMap();
             return map;
         }
 
-        public Target Map<Source, Target>(Source source) {
+        public Target InnerMap<Source, Target>(Source source) {
             return MapperLink<Source, Target>.Map(source);
         }
 
@@ -62,18 +68,19 @@ namespace MT.KitTools.Mapper {
         /// </summary>
         /// <typeparam name="Source"></typeparam>
         /// <typeparam name="Target"></typeparam>
-        private static class MapperLink<Source, Target> {
+        internal static class MapperLink<Source, Target> {
             private static readonly Func<object, Target> converter;
             private static Profiles profile = null;
             static MapperLink() {
                 // 
-                profile = ProfileProvider.GetProfile(typeof(Source), typeof(Target));
+                Type sourceType = typeof(Source);
+                Type targetType = typeof(Target);
+                profile = ProfileProvider.GetProfile(sourceType, targetType);
                 if (profile == null) {
                     profile = CreateProfile<Source, Target>();
                 }
                 converter = (Func<object, Target>)profile.CreateDelegate();
             }
-
 
             public static Target Map(Source source) {
                 return converter.Invoke(source);

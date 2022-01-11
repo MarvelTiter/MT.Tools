@@ -14,8 +14,10 @@ namespace MT.KitTools.ExpressionHelper {
             if (ReferenceEquals(sourceType, targetType)) {
                 return Expression.Convert(source, sourceType);
             } else if (ReferenceEquals(sourceType, typeof(string))) {
+                // XXX.Parse()
                 return GetParseExpression(source, targetType, CultureInfo.CurrentCulture);
             } else if (ReferenceEquals(targetType, typeof(string))) {
+                // XXX.ToString()
                 return Expression.Call(source, sourceType.GetMethod("ToString", Type.EmptyTypes));
             } else if (ReferenceEquals(targetType, typeof(bool))) {
                 MethodInfo ToBooleanMethod = typeof(Convert).GetMethod("ToBoolean", new[] { sourceType });

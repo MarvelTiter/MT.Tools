@@ -1,6 +1,7 @@
 ﻿using KitTools.Test.Models;
 using MT.KitTools.Mapper;
 using NUnit.Framework;
+using System.Collections.Generic;
 using System.IO;
 
 namespace KitTools.Test {
@@ -28,7 +29,6 @@ namespace KitTools.Test {
                 config.StringComparison = System.StringComparison.OrdinalIgnoreCase | System.StringComparison.CurrentCulture;
                 config.EnablePrefixMatch("TEST_");
             });
-
             Mapper.Default.CreateMap<User, UserDTO>(profile => {
                 profile.Mapping((u, ut) => {
                     ut.NA = $"{u.Name} => {u.Age}";
@@ -42,29 +42,37 @@ namespace KitTools.Test {
 
         [Test]
         public void AutoMap() {
-            var ud = user.Map<User, UserDTO>();
+            var ud = Mapper.Map<User, UserDTO>(user);
             Assert.IsTrue(user.Address == ud.Address);
             Assert.IsTrue(user.Avatar.Length == ud.Avatar.Length);
         }
 
         [Test]
         public void RuleMap() {
-            var ud = user.Map<User, UserDTO>();
+            var ud = Mapper.Map<User, UserDTO>(user);
             Assert.IsTrue(ud.NA == $"{user.Name} => {user.Age}");
         }
 
-        //[Test]
-        //public void BackwardMap() {
-        //    var u = Mapper.Map<UserDTO, User>(userDto);
-        //    Assert.IsTrue(u.Name == "Marvel");
-        //    Assert.IsTrue(u.Age == 20);
-        //}
-
         [Test]
-        public void IEnumerableTest() {
-            Assert.Pass();
+        public void MapToDictionaryObject() {
+            var u = Mapper.Map<User, IDictionary<string, object>>(user);
+            Assert.IsTrue(u.Count == 5);
+            Assert.IsTrue(u["Name"].ToString() == "Marvel");
         }
 
+        [Test]
+        public void MapToDictionaryInt() {
+            var u = Mapper.Map<User, IDictionary<string, int>>(user);
+            Assert.IsTrue(u.Count == 1);
+            Assert.IsTrue(u["Age"] == 20);
+        }
 
+        //[Test]
+        //public void IEnumerableTest() {
+        //    IList<User> list = new List<User> { user };
+        //    //var ud = user.Map<User, UserDTO>();
+        //    var userDTOs = Mapper.Map<User, UserDTO>(list);
+        //    Assert.Pass();
+        //}
     }
 }

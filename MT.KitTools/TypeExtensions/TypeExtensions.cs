@@ -7,12 +7,15 @@ using System.Threading.Tasks;
 namespace MT.KitTools.TypeExtensions {
     public static class TypeExtensions {
         private static readonly string System_Collections_Generic_Dictionary = "System.Collections.Generic.Dictionary";
+        private static readonly string System_Collections_Generic_IDictionary = "System.Collections.Generic.IDictionary";
         private static readonly string System_Collections_Generic_ICollection_1 = "System.Collections.Generic.ICollection`1";
         private static readonly string System_Collections_Generic_IEnumerable_1 = "System.Collections.Generic.IEnumerable`1";
 
         public static bool IsDictionary(this Type type) {
+            var interfaces = type.GetInterfaces();
             return type.FullName.StartsWith(System_Collections_Generic_Dictionary) ||
-                type.GetInterfaces().Any(tp => tp.FullName.StartsWith(System_Collections_Generic_Dictionary));
+                type.FullName.StartsWith(System_Collections_Generic_IDictionary) ||
+                type.GetInterfaces().Any(tp => tp.FullName.StartsWith(System_Collections_Generic_IDictionary));
         }
         public static bool IsIEnumerableType(this Type type) {
             return type.FullName.StartsWith(System_Collections_Generic_IEnumerable_1) ||

@@ -20,6 +20,9 @@ namespace MT.KitTools.Mapper {
         }
 
         internal bool Match(PropertyInfo source, PropertyInfo target) {
+            if (source == null || target == null) {
+                return true;
+            }
             bool matched = false;
             string sourceName = source.Name;
             string targetName = target.Name;
