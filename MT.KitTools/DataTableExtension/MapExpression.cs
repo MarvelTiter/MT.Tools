@@ -20,7 +20,7 @@ namespace MT.KitTools.DataTableExtension
             var columnNames = from col in cols.Cast<DataColumn>()
                               select col.ColumnName;
             var key = string.Join("_", columnNames);
-            if(actions.TryGetValue(key, out var action))
+            if (actions.TryGetValue(key, out var action))
             {
                 return action;
             }
@@ -51,7 +51,16 @@ namespace MT.KitTools.DataTableExtension
         {
             MethodCallExpression rowObjExp = Expression.Call(parameterExpression, Datarow_getItem, Expression.Constant(column.ColumnName));
             MethodCallExpression checkNullExp = Expression.Call(parameterExpression, DataRow_IsNull, Expression.Constant(column.ColumnName));
-            Expression realValueExp = DataTypeConvert.GetConversionExpression(rowObjExp, column.DataType, targetType);
+            Expression e;
+            Type t = column.DataType;
+            if (targetType != typeof(byte[]))
+            {
+                e = Expression.Call(rowObjExp, typeof(object).GetMethod("ToString", Type.EmptyTypes));
+                t = typeof(string);
+            }
+            else
+                e = rowObjExp;
+            Expression realValueExp = DataTypeConvert.GetConversionExpression(e, t, targetType);
             if (column.AllowDBNull)
             {
                 return Expression.Condition(

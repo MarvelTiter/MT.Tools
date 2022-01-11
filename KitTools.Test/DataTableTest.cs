@@ -19,7 +19,7 @@ namespace KitTools.Test
 
         class TestModel
         {
-            public int Id { get; set; }
+            public string Id { get; set; }
             public string Name { get; set; }
             public DateTime Birthdate { get; set; }
         }
@@ -44,7 +44,7 @@ namespace KitTools.Test
             var tm = new TestModel();
             tm.MapFromTable(idTable);
             tm.MapFromTable(nameTable);
-            Assert.True(tm.Id == 10);
+            Assert.True(tm.Id == "10");
             Assert.True(tm.Name == "测试");
         }
     }
