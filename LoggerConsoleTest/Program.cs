@@ -1,6 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using MT.KitTools.Log;
+using MT.KitTools.LogTool;
 
 Logger.Enable(LogType.Console | LogType.File);
 Logger.Info("info");

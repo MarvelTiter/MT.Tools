@@ -11,7 +11,6 @@ namespace MT.KitTools.DataTableExtension
         {
             return dt != null && dt.Rows.Count > 0;
         }
-
         public static IEnumerable<T> ToEnumerable<T>(this DataTable self, bool mapAllFields = false)
         {
             foreach (DataRow row in self.Rows)
@@ -64,6 +63,12 @@ namespace MT.KitTools.DataTableExtension
             var val = self[key];
             var undeylying = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
             return (T)Convert.ChangeType(val, undeylying);
+        }
+
+        public static void MapFromTable<T>(this T self, DataTable source)
+        {
+            var action = MapExpression<T>.Build(source.Columns);
+            action?.Invoke(self, source.Rows[0]);
         }
     }
 }
