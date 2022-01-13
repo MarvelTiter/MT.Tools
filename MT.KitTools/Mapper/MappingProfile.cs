@@ -100,7 +100,7 @@ namespace MT.KitTools.Mapper
                 MapAction?.Invoke((Source)o, t);
                 return t;
             };
-            return del;
+            return newFunc;
         }
     }
 }
