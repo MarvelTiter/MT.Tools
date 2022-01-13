@@ -15,28 +15,28 @@ namespace MT.KitTools.Mapper
         ClassObjectToDictionary,
         DictionaryToClassObject
     }
-    public partial class MappingProfile<Source, Target> : Profiles
+    public partial class MappingProfile<TFrom, TTarget> : Profiles
     {
 
         private Type sourceType;
         private Type targetType;
 
-        private Type sourceElementType => sourceType.IsICollectionType() ? sourceType.GetCollectionElementType() : sourceType;
-        private Type targetElementType => targetType.IsICollectionType() ? targetType.GetCollectionElementType() : targetType;
+        private Type SourceElementType => sourceType.IsICollectionType() ? sourceType.GetCollectionElementType() : sourceType;
+        private Type TargetElementType => targetType.IsICollectionType() ? targetType.GetCollectionElementType() : targetType;
 
         public override IList<MappingRule> Rules { get; }
-        protected Action<Source, Target> MapAction { get; set; }
-        protected MapperConfig mapperConfig { get; } = MapperConfigProvider.GetMapperConfig();
+        protected Action<TFrom, TTarget> MapAction { get; set; }
+        protected MapperConfig MapperConfig { get; } = MapperConfigProvider.GetMapperConfig();
 
         internal MappingProfile()
         {
-            sourceType = typeof(Source);
-            targetType = typeof(Target);
+            sourceType = typeof(TFrom);
+            targetType = typeof(TTarget);
             Rules = new List<MappingRule>();
             AutoMap();
         }
 
-        public MappingProfile<Source, Target> Mapping(Action<Source, Target> action)
+        public MappingProfile<TFrom, TTarget> Mapping(Action<TFrom, TTarget> action)
         {
             MapAction = action;
             return this;
@@ -49,11 +49,11 @@ namespace MT.KitTools.Mapper
                 return;
             }
             Rules.Clear();
-            var targetProps = targetElementType.GetProperties();
-            var sourceProps = sourceElementType.GetProperties();
+            var targetProps = TargetElementType.GetProperties();
+            var sourceProps = SourceElementType.GetProperties();
             foreach (var item in targetProps)
             {
-                var sourceMember = sourceProps.FirstOrDefault(p => mapperConfig.Match(p, item));
+                var sourceMember = sourceProps.FirstOrDefault(p => MapperConfig.Match(p, item));
                 if (!Rules.Any(r => r.MapTo == item) && sourceMember != null)
                     AddMap(item, sourceMember);
             }
@@ -74,7 +74,7 @@ namespace MT.KitTools.Mapper
             {
                 var requestSourceType = source.IsICollectionType() ? source.GetCollectionElementType() : source;
                 var requestTargetType = target.IsICollectionType() ? target.GetCollectionElementType() : target;
-                return ReferenceEquals(requestSourceType, sourceElementType) && ReferenceEquals(requestTargetType, targetElementType);
+                return ReferenceEquals(requestSourceType, SourceElementType) && ReferenceEquals(requestTargetType, TargetElementType);
             }
         }
 
@@ -89,15 +89,15 @@ namespace MT.KitTools.Mapper
             MapInfo p = new MapInfo();
             p.SourceType = sourceType;
             p.TargetType = targetType;
-            p.SourceElementType = sourceElementType;
-            p.TargetElementType = targetElementType;
+            p.SourceElementType = SourceElementType;
+            p.TargetElementType = TargetElementType;
             p.Rules = Rules;
             var lambda = CreateExpression.ExpressionBuilder(p);
-            var del = lambda.Compile() as Func<object, Target>;
-            Func<object, Target> newFunc = o =>
+            var del = lambda.Compile() as Func<object, TTarget>;
+            Func<object, TTarget> newFunc = o =>
             {
                 var t = del.Invoke(o);
-                MapAction?.Invoke((Source)o, t);
+                MapAction?.Invoke((TFrom)o, t);
                 return t;
             };
             return newFunc;
