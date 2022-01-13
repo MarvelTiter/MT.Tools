@@ -80,6 +80,13 @@ namespace KitTools.Test
             Assert.IsTrue(u["Age"] == 20);
         }
 
+        [Test]
+        public void MapFrom()
+        {
+            var u = new User();
+            u.Map(user);
+        }
+
         //[Test]
         //public void IEnumerableTest() {
         //    IList<User> list = new List<User> { user };

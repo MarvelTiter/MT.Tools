@@ -17,25 +17,15 @@ namespace MT.KitTools.Mapper
     }
     public class MappingProfile<TFrom, TTarget> : Profiles
     {
-        private Type sourceType;
-        private Type targetType;
-        private Type SourceElementType => sourceType.IsICollectionType() ? sourceType.GetCollectionElementType() : sourceType;
-        private Type TargetElementType => targetType.IsICollectionType() ? targetType.GetCollectionElementType() : targetType;
         public override IList<MappingRule> Rules { get; }
         protected Action<TFrom, TTarget> MapAction { get; set; }
         protected MapperConfig MapperConfig { get; } = MapperConfigProvider.GetMapperConfig();
-        public MappingProfile(Type type1, Type type2)
-        {
-            types = new[] { type1, type2 };
-        }
         internal MappingProfile()
         {
-            sourceType = typeof(TFrom);
-            targetType = typeof(TTarget);
+            types = new[] { typeof(TFrom), typeof(TTarget) };
             Rules = new List<MappingRule>();
             AutoMap();
         }
-
         public MappingProfile<TFrom, TTarget> Mapping(Action<TFrom, TTarget> action)
         {
             MapAction = action;
@@ -44,7 +34,7 @@ namespace MT.KitTools.Mapper
 
         public void AutoMap()
         {
-            if (sourceType.IsDictionary() || targetType.IsDictionary())
+            if (SourceType.IsDictionary() || TargetType.IsDictionary())
             {
                 return;
             }
@@ -67,7 +57,7 @@ namespace MT.KitTools.Mapper
 
             bool isTypeEquals()
             {
-                return ReferenceEquals(source, sourceType) && ReferenceEquals(target, targetType);
+                return ReferenceEquals(source, SourceType) && ReferenceEquals(target, TargetType);
             }
 
             bool isElementTypeEquals()
@@ -84,23 +74,37 @@ namespace MT.KitTools.Mapper
             Rules.Add(rule);
         }
 
-        public override Delegate CreateDelegate()
+        public override Delegate CreateDelegate(ActionType actionType)
         {
             MapInfo p = new MapInfo();
-            p.SourceType = sourceType;
-            p.TargetType = targetType;
+            p.SourceType = SourceType;
+            p.TargetType = TargetType;
             p.SourceElementType = SourceElementType;
             p.TargetElementType = TargetElementType;
             p.Rules = Rules;
+            p.ActionType = actionType;
             var lambda = CreateExpression.ExpressionBuilder(p);
-            var del = lambda.Compile() as Func<object, TTarget>;
-            Func<object, TTarget> newFunc = o =>
+            if (actionType == ActionType.NewObj)
             {
-                var t = del.Invoke(o);
-                MapAction?.Invoke((TFrom)o, t);
-                return t;
-            };
-            return newFunc;
+                var del = lambda.Compile() as Func<object, TTarget>;
+                Func<object, TTarget> newFunc = o =>
+                {
+                    var t = del.Invoke(o);
+                    MapAction?.Invoke((TFrom)o, t);
+                    return t;
+                };
+                return newFunc;
+            }
+            else
+            {
+                var del = lambda.Compile() as Action<TFrom, TTarget>;
+                Action<TFrom, TTarget> newAction = (f, t) =>
+                 {
+                     del.Invoke(f, t);
+                     MapAction?.Invoke(f, t);
+                 };
+                return del;
+            }
         }
     }
 }

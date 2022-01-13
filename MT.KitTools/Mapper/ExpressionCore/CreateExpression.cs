@@ -10,30 +10,56 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MT.KitTools.Mapper.ExpressionCore
-{    
+{
     internal partial class CreateExpression
     {
         internal static LambdaExpression ExpressionBuilder(MapInfo p)
         {
-            var sourceParameter = Expression.Parameter(typeof(object), "sourceParameter");
-            p.SourceExpression = Expression.Variable(p.SourceType, "source");
             var body = new List<Expression>();
-            if (p.SourceType.IsValueType)
+            if (p.ActionType == ActionType.NewObj)
             {
-                body.Add(Expression.Assign(p.SourceExpression, Expression.Unbox(sourceParameter, p.SourceType)));
+                p.Parameters.Add(Expression.Parameter(typeof(object), "source"));
+                p.SourceExpression = Expression.Variable(p.SourceType, "source");
+                if (p.SourceType.IsValueType)
+                {
+                    body.Add(Expression.Assign(p.SourceExpression, Expression.Unbox(p.SourceExpression, p.SourceType)));
+                }
+                else
+                {
+                    body.Add(Expression.Assign(p.SourceExpression, Expression.TypeAs(p.SourceExpression, p.SourceType)));
+                }
+                p.Variables.Add(p.SourceExpression as ParameterExpression);
+            }
+            else if (p.ActionType == ActionType.Assign)
+            {
+                Type targetType = p.TargetType;
+                Type fromType = p.SourceType;
+                var targetProps = targetType.GetProperties();
+                var fromProps = fromType.GetProperties();
+                p.TargetExpression = Expression.Parameter(targetType, "tar");
+                p.SourceExpression = Expression.Parameter(fromType, "from");
+                foreach (var tar in targetProps)
+                {
+                    if (!tar.CanWrite) continue;
+                    var from = fromProps.FirstOrDefault(f => f.Name.ToLower() == tar.Name.ToLower());
+                    if (from == null) continue;
+                    //MemberExpression tarProp = Expression.Property(targetExp, tar);
+                    MemberExpression fromProp = Expression.Property(p.SourceExpression, from);
+                    var converted = DataTypeConvert.GetConversionExpression(fromProp, tar.PropertyType, from.PropertyType);
+                    MethodCallExpression setPropExp = Expression.Call(p.TargetExpression, tar.SetMethod, converted);
+                    body.Add(setPropExp);
+                }
             }
             else
-            {
-                body.Add(Expression.Assign(p.SourceExpression, Expression.TypeAs(sourceParameter, p.SourceType)));
-            }
-            var func = GetHandler(p);
-            var expression = func.Invoke(p);
-            body.Add(expression);
-            BlockExpression block = Expression.Block(new[] { p.SourceExpression as ParameterExpression }, body);
-            LambdaExpression lambda = Expression.Lambda(block, sourceParameter);
+                throw new ArgumentException($"Unknow ActionType {p.ActionType}");
+
+            var action = GetHandler(p);
+            action.Invoke(p, body);
+            BlockExpression block = Expression.Block(p.Variables, body);
+            LambdaExpression lambda = Expression.Lambda(block, p.Parameters);
             return lambda;
         }
-        internal static Func<MapInfo, Expression> GetHandler(MapInfo p)
+        internal static Action<MapInfo, List<Expression>> GetHandler(MapInfo p)
         {
             var sourceType = p.SourceType;
             var targetType = p.TargetType;
@@ -43,10 +69,25 @@ namespace MT.KitTools.Mapper.ExpressionCore
                 return MapToDictionary;
             else if (sourceType.IsClass && targetType.IsClass)
                 return ClassMap;
-            else if (sourceType.IsICollectionType() && targetType.IsICollectionType())
-                return CollectionMap;
+            //else if (sourceType.IsICollectionType() && targetType.IsICollectionType())
+            //    return CollectionMap;
             throw new NotImplementedException($"not implement map between {sourceType.Name} and {targetType.Name}");
-        }                  
+        }
+
+        //internal static Action<MapInfo, List<Expression>> GetHandler2(MapInfo p)
+        //{
+        //    var sourceType = p.SourceType;
+        //    var targetType = p.TargetType;
+        //    if (sourceType.IsDictionary())
+        //        return MapFromDictionary;
+        //    else if (targetType.IsDictionary())
+        //        return MapToDictionary;
+        //    else if (sourceType.IsClass && targetType.IsClass)
+        //        return ClassMap;
+        //    else if (sourceType.IsICollectionType() && targetType.IsICollectionType())
+        //        return CollectionMap;
+        //    throw new NotImplementedException($"not implement map between {sourceType.Name} and {targetType.Name}");
+        //}
     }
 
 }

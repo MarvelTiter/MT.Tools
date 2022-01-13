@@ -10,13 +10,13 @@ namespace MT.KitTools.Mapper.ExpressionCore
 {
     internal partial class CreateExpression
     {
-        internal static Expression ClassMap(MapInfo p)
+        internal static void ClassMap(MapInfo p, List<Expression> body)
         {
             var source = p.SourceExpression as ParameterExpression;
             List<MemberBinding> bindings = new List<MemberBinding>();
             initBindings(ref bindings, source, p.Rules);
-            MemberInitExpression body = Expression.MemberInit(Expression.New(p.TargetElementType), bindings);
-            return body;
+            MemberInitExpression init = Expression.MemberInit(Expression.New(p.TargetElementType), bindings);
+            body.Add(init);
         }
 
         internal static MemberInitExpression ClassMap(List<MappingRule> rules, Type sourceType, Type targetType, object source)

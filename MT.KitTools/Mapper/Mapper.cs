@@ -32,9 +32,10 @@ namespace MT.KitTools.Mapper
 
         private Mapper() { }
 
-        public void Configuration(Action<MapperConfig> config)
+        public Mapper Configuration(Action<MapperConfig> config)
         {
             config?.Invoke(Config);
+            return this;
         }
 
         /// <summary>
@@ -43,10 +44,11 @@ namespace MT.KitTools.Mapper
         /// <typeparam name="TFrom"></typeparam>
         /// <typeparam name="TTarget"></typeparam>
         /// <param name="context"></param>
-        public void CreateMap<TFrom, TTarget>(Action<MappingProfile<TFrom, TTarget>> context = null)
+        public Mapper CreateMap<TFrom, TTarget>(Action<MappingProfile<TFrom, TTarget>> context = null)
         {
             var map = MapperExtensions.CreateProfile<TFrom, TTarget>();
             context?.Invoke(map);
+            return this;
         }
         public TTarget NewMap<TFrom, TTarget>(TFrom source)
         {

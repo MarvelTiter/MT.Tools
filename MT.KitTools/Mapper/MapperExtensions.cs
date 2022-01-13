@@ -8,7 +8,17 @@ namespace MT.KitTools.Mapper
 {
     public static partial class MapperExtensions
     {
-        
+        /// <summary>
+        /// 为现有的对象赋值
+        /// </summary>
+        /// <typeparam name="TTarget"></typeparam>
+        /// <typeparam name="TFrom"></typeparam>
+        /// <param name="self"></param>
+        /// <param name="source"></param>
+        public static void Map<TFrom, TTarget>(this TTarget self, TFrom source)
+        {
+            InnerMapper<TFrom, TTarget>.Invoke( source, self);
+        }
 
         /// <summary>
         /// 创建 MappingProfile，并检查是否重复
@@ -42,7 +52,7 @@ namespace MT.KitTools.Mapper
                 {
                     profile = CreateProfile<TFrom, TTarget>();
                 }
-                converter = (Func<object, TTarget>)profile.CreateDelegate();
+                converter = (Func<object, TTarget>)profile.CreateDelegate(ActionType.NewObj);
             }
 
             public static TTarget Create(TFrom source)
@@ -50,46 +60,14 @@ namespace MT.KitTools.Mapper
                 return converter.Invoke(source);
             }
         }
-        /// <summary>
-        /// 为现有的对象赋值
-        /// </summary>
-        /// <typeparam name="TTarget"></typeparam>
-        /// <typeparam name="TFrom"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="source"></param>
-        public static void Map<TTarget, TFrom>(this TTarget self, TFrom source)
+        
+        internal static class InnerMapper<TFrom, TTarget>
         {
-
-        }
-
-        private static class InnerMapper<TTarget, TFrom>
-        {
-            private static readonly Action<TTarget, TFrom> action;
+            private static readonly Action<TFrom, TTarget> action;
             private static Profiles profile = null;
 
             static InnerMapper()
-            {
-                //Type targetType = typeof(TTarget);
-                //Type fromType = typeof(TFrom);
-                //var targetProps = targetType.GetProperties();
-                //var fromProps = fromType.GetProperties();
-                //ParameterExpression targetExp = Expression.Parameter(targetType, "tar");
-                //ParameterExpression fromExp = Expression.Parameter(fromType, "from");
-                //List<Expression> body = new List<Expression>();
-                //foreach (var tar in targetProps)
-                //{
-                //    if (!tar.CanWrite) continue;
-                //    var from = fromProps.FirstOrDefault(f => f.Name.ToLower() == tar.Name.ToLower());
-                //    if (from == null) continue;
-                //    //MemberExpression tarProp = Expression.Property(targetExp, tar);
-                //    MemberExpression fromProp = Expression.Property(fromExp, from);
-                //    var converted = DataTypeConvert.GetConversionExpression(fromProp, tar.PropertyType, from.PropertyType);
-                //    MethodCallExpression setPropExp = Expression.Call(targetExp, tar.SetMethod, converted);
-                //    body.Add(setPropExp);
-                //}
-                //var lambda = Expression.Lambda(Expression.Block(body), new ParameterExpression[] { targetExp, fromExp });
-                //action = (Action<TTarget, TFrom>)lambda.Compile();
-
+            {               
                 Type sourceType = typeof(TFrom);
                 Type targetType = typeof(TTarget);
                 profile = ProfileProvider.GetProfile(sourceType, targetType);
@@ -97,10 +75,10 @@ namespace MT.KitTools.Mapper
                 {
                     profile = CreateProfile<TFrom, TTarget>();
                 }
-                action = (Action<TTarget, TFrom>)profile.CreateDelegate();
+                action = (Action<TFrom, TTarget>)profile.CreateDelegate(ActionType.Assign);
             }
 
-            public static void Invoke(TTarget source, TFrom target)
+            public static void Invoke(TFrom source, TTarget target)
             {
                 action?.Invoke(source, target);
             }

@@ -10,9 +10,8 @@ namespace MT.KitTools.Mapper.ExpressionCore
 {
     internal partial class CreateExpression
     {
-        internal static Expression MapToDictionary(MapInfo p)
+        internal static void MapToDictionary(MapInfo p, List<Expression> body)
         {
-            List<Expression> body = new List<Expression>();
             var genericArgs = p.TargetType.GetGenericArguments();
             var keyType = genericArgs[0];
             var valueType = genericArgs[1];
@@ -23,11 +22,16 @@ namespace MT.KitTools.Mapper.ExpressionCore
             var dicType = typeof(Dictionary<,>).MakeGenericType(genericArgs);
             MethodInfo addMethod = dicType.GetMethod("Add", genericArgs);
             var props = p.SourceType.GetProperties();
+
             // var dic = new Dictionary<string, object>();
-            ParameterExpression dicExpression = Expression.Variable(dicType, "dic");
+            //ParameterExpression dicExpression = Expression.Variable(dicType, "dic");
             //body.Add(dicExpression);
-            body.Add(Expression.Assign(dicExpression, Expression.New(dicType)));
+            //body.Add(Expression.Assign(dicExpression, Expression.New(dicType)));
             // dic.Add();
+            List<Expression> temp = new List<Expression>();
+            p.TargetExpression = Expression.Variable(dicType, "dic");
+            body.Add(Expression.Assign(p.TargetExpression, Expression.New(dicType)));
+            p.Variables.Add(p.TargetExpression as ParameterExpression);
             foreach (PropertyInfo property in props)
             {
                 if (!property.CanRead) continue;
@@ -35,14 +39,13 @@ namespace MT.KitTools.Mapper.ExpressionCore
                 {
                     var key = Expression.Constant(property.Name, keyType);
                     var value = Expression.Property(p.SourceExpression, property);
-                    MethodCallExpression callAdd = Expression.Call(dicExpression, addMethod, key, Expression.Convert(value, valueType));
+                    MethodCallExpression callAdd = Expression.Call(p.TargetExpression, addMethod, key, Expression.Convert(value, valueType));
                     body.Add(callAdd);
                 }
             }
-            // return dic;
-            body.Add(Expression.Convert(dicExpression, p.TargetType));
-            var block = Expression.Block(new[] { dicExpression }, body);
-            return block;
+            // Func 需要 return dic;
+            if (p.ActionType == ActionType.NewObj)
+                body.Add(p.TargetExpression);
         }
     }
 }

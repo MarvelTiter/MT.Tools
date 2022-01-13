@@ -9,9 +9,8 @@ namespace MT.KitTools.Mapper.ExpressionCore
 {
     internal partial class CreateExpression
     {
-        internal static Expression MapFromDictionary(MapInfo p)
+        internal static void MapFromDictionary(MapInfo p, List<Expression> body)
         {
-            List<Expression> body = new List<Expression>();
             var genericArgs = p.SourceType.GetGenericArguments();
             var keyType = genericArgs[0];
             var valueType = genericArgs[1];
