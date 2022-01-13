@@ -12,6 +12,26 @@ namespace MT.KitTools.Mapper.ExpressionCore
     {
         internal static void ClassMap(MapInfo p, List<Expression> body)
         {
+            // 硬编码一下
+            if (p.ActionType == ActionType.Assign)
+            {
+                Type targetType = p.TargetType;
+                Type fromType = p.SourceType;
+                var targetProps = targetType.GetProperties();
+                var fromProps = fromType.GetProperties();
+                foreach (var tar in targetProps)
+                {
+                    if (!tar.CanWrite) continue;
+                    var from = fromProps.FirstOrDefault(f => f.Name.ToLower() == tar.Name.ToLower());
+                    if (from == null) continue;
+                    //MemberExpression tarProp = Expression.Property(targetExp, tar);
+                    MemberExpression fromProp = Expression.Property(p.SourceExpression, from);
+                    var converted = DataTypeConvert.GetConversionExpression(fromProp, tar.PropertyType, from.PropertyType);
+                    MethodCallExpression setPropExp = Expression.Call(p.TargetExpression, tar.SetMethod, converted);
+                    body.Add(setPropExp);
+                }
+                return;
+            }
             var source = p.SourceExpression as ParameterExpression;
             List<MemberBinding> bindings = new List<MemberBinding>();
             initBindings(ref bindings, source, p.Rules);

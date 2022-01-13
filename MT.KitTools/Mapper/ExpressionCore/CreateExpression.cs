@@ -18,37 +18,25 @@ namespace MT.KitTools.Mapper.ExpressionCore
             var body = new List<Expression>();
             if (p.ActionType == ActionType.NewObj)
             {
-                p.Parameters.Add(Expression.Parameter(typeof(object), "source"));
+                var pExp = Expression.Parameter(typeof(object), "p");
                 p.SourceExpression = Expression.Variable(p.SourceType, "source");
                 if (p.SourceType.IsValueType)
                 {
-                    body.Add(Expression.Assign(p.SourceExpression, Expression.Unbox(p.SourceExpression, p.SourceType)));
+                    body.Add(Expression.Assign(p.SourceExpression, Expression.Unbox(pExp, p.SourceType)));
                 }
                 else
                 {
-                    body.Add(Expression.Assign(p.SourceExpression, Expression.TypeAs(p.SourceExpression, p.SourceType)));
+                    body.Add(Expression.Assign(p.SourceExpression, Expression.TypeAs(pExp, p.SourceType)));
                 }
+                p.Parameters.Add(pExp);
                 p.Variables.Add(p.SourceExpression as ParameterExpression);
             }
             else if (p.ActionType == ActionType.Assign)
-            {
-                Type targetType = p.TargetType;
-                Type fromType = p.SourceType;
-                var targetProps = targetType.GetProperties();
-                var fromProps = fromType.GetProperties();
-                p.TargetExpression = Expression.Parameter(targetType, "tar");
-                p.SourceExpression = Expression.Parameter(fromType, "from");
-                foreach (var tar in targetProps)
-                {
-                    if (!tar.CanWrite) continue;
-                    var from = fromProps.FirstOrDefault(f => f.Name.ToLower() == tar.Name.ToLower());
-                    if (from == null) continue;
-                    //MemberExpression tarProp = Expression.Property(targetExp, tar);
-                    MemberExpression fromProp = Expression.Property(p.SourceExpression, from);
-                    var converted = DataTypeConvert.GetConversionExpression(fromProp, tar.PropertyType, from.PropertyType);
-                    MethodCallExpression setPropExp = Expression.Call(p.TargetExpression, tar.SetMethod, converted);
-                    body.Add(setPropExp);
-                }
+            {               
+                p.TargetExpression = Expression.Parameter(p.TargetType, "tar");
+                p.SourceExpression = Expression.Parameter(p.SourceType, "from");                
+                p.Parameters.Add(p.SourceExpression as ParameterExpression);
+                p.Parameters.Add(p.TargetExpression as ParameterExpression);
             }
             else
                 throw new ArgumentException($"Unknow ActionType {p.ActionType}");

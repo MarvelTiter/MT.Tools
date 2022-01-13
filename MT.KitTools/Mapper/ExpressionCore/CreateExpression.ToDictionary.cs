@@ -28,10 +28,12 @@ namespace MT.KitTools.Mapper.ExpressionCore
             //body.Add(dicExpression);
             //body.Add(Expression.Assign(dicExpression, Expression.New(dicType)));
             // dic.Add();
-            List<Expression> temp = new List<Expression>();
-            p.TargetExpression = Expression.Variable(dicType, "dic");
-            body.Add(Expression.Assign(p.TargetExpression, Expression.New(dicType)));
-            p.Variables.Add(p.TargetExpression as ParameterExpression);
+            if (p.TargetExpression == null)
+            {
+                p.TargetExpression = Expression.Variable(dicType, "dic");
+                body.Add(Expression.Assign(p.TargetExpression, Expression.New(dicType)));
+                p.Variables.Add(p.TargetExpression as ParameterExpression);
+            }
             foreach (PropertyInfo property in props)
             {
                 if (!property.CanRead) continue;
@@ -45,7 +47,7 @@ namespace MT.KitTools.Mapper.ExpressionCore
             }
             // Func 需要 return dic;
             if (p.ActionType == ActionType.NewObj)
-                body.Add(p.TargetExpression);
+                body.Add(Expression.Convert(p.TargetExpression, p.TargetType));
         }
     }
 }
