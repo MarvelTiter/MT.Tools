@@ -5,25 +5,25 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace MT.KitTools.Mapper {
+namespace MT.KitTools.Mapper
+{
 
-    public static class MapperExtensions {
-        
-
-        
-    }
-
-    public class Mapper {
-        public static Target Map<Source, Target>(Source source) {
+    public class Mapper
+    {
+        public static Target Map<Source, Target>(Source source)
+        {
             return Default.InnerMap<Source, Target>(source);
         }
-        public static IEnumerable<Target> Map<Source, Target>(IEnumerable<Source> sources) {
-            foreach (var item in sources) {
+        public static IEnumerable<Target> Map<Source, Target>(IEnumerable<Source> sources)
+        {
+            foreach (var item in sources)
+            {
                 yield return Map<Source, Target>(item);
             }
         }
@@ -33,7 +33,8 @@ namespace MT.KitTools.Mapper {
 
         private Mapper() { }
 
-        public void Configuration(Action<MapperConfig> config) {
+        public void Configuration(Action<MapperConfig> config)
+        {
             config?.Invoke(Config);
         }
 
@@ -43,7 +44,8 @@ namespace MT.KitTools.Mapper {
         /// <typeparam name="Source"></typeparam>
         /// <typeparam name="Target"></typeparam>
         /// <param name="context"></param>
-        public void CreateMap<Source, Target>(Action<MappingProfile<Source, Target>> context = null) {
+        public void CreateMap<Source, Target>(Action<MappingProfile<Source, Target>> context = null)
+        {
             var map = CreateProfile<Source, Target>();
             context?.Invoke(map);
         }
@@ -53,13 +55,15 @@ namespace MT.KitTools.Mapper {
         /// <typeparam name="Source"></typeparam>
         /// <typeparam name="Target"></typeparam>
         /// <returns></returns>
-        private static MappingProfile<Source, Target> CreateProfile<Source, Target>() {
+        private static MappingProfile<Source, Target> CreateProfile<Source, Target>()
+        {
             var map = new MappingProfile<Source, Target>();
             ProfileProvider.Cache(map, typeof(Source), typeof(Target));
             return map;
         }
 
-        public Target InnerMap<Source, Target>(Source source) {
+        public Target InnerMap<Source, Target>(Source source)
+        {
             return MapperLink<Source, Target>.Map(source);
         }
 
@@ -68,21 +72,25 @@ namespace MT.KitTools.Mapper {
         /// </summary>
         /// <typeparam name="Source"></typeparam>
         /// <typeparam name="Target"></typeparam>
-        internal static class MapperLink<Source, Target> {
+        internal static class MapperLink<Source, Target>
+        {
             private static readonly Func<object, Target> converter;
             private static Profiles profile = null;
-            static MapperLink() {
+            static MapperLink()
+            {
                 // 
                 Type sourceType = typeof(Source);
                 Type targetType = typeof(Target);
                 profile = ProfileProvider.GetProfile(sourceType, targetType);
-                if (profile == null) {
+                if (profile == null)
+                {
                     profile = CreateProfile<Source, Target>();
                 }
                 converter = (Func<object, Target>)profile.CreateDelegate();
             }
 
-            public static Target Map(Source source) {
+            public static Target Map(Source source)
+            {
                 return converter.Invoke(source);
             }
         }

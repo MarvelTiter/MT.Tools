@@ -9,15 +9,21 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MT.KitTools.Mapper.ExpressionCore {
-    internal class CreateExpression {
-        internal static LambdaExpression ExpressionBuilder(MapInfo p) {
+namespace MT.KitTools.Mapper.ExpressionCore
+{
+    internal class CreateExpression
+    {
+        internal static LambdaExpression ExpressionBuilder(MapInfo p)
+        {
             var sourceParameter = Expression.Parameter(typeof(object), "sourceParameter");
             p.SourceExpression = Expression.Variable(p.SourceType, "source");
             var body = new List<Expression>();
-            if (p.SourceType.IsValueType) {
+            if (p.SourceType.IsValueType)
+            {
                 body.Add(Expression.Assign(p.SourceExpression, Expression.Unbox(sourceParameter, p.SourceType)));
-            } else {
+            }
+            else
+            {
                 body.Add(Expression.Assign(p.SourceExpression, Expression.TypeAs(sourceParameter, p.SourceType)));
             }
             var func = GetHandler(p);
@@ -27,7 +33,8 @@ namespace MT.KitTools.Mapper.ExpressionCore {
             LambdaExpression lambda = Expression.Lambda(block, sourceParameter);
             return lambda;
         }
-        internal static Func<MapInfo, Expression> GetHandler(MapInfo p) {
+        internal static Func<MapInfo, Expression> GetHandler(MapInfo p)
+        {
             var sourceType = p.SourceType;
             var targetType = p.TargetType;
             if (sourceType.IsDictionary())
@@ -41,23 +48,27 @@ namespace MT.KitTools.Mapper.ExpressionCore {
             throw new NotImplementedException($"not implement map between {sourceType.Name} and {targetType.Name}");
         }
 
-        internal static Expression MapFromDictionary(MapInfo p) {
+        internal static Expression MapFromDictionary(MapInfo p)
+        {
             List<Expression> body = new List<Expression>();
             var genericArgs = p.SourceType.GetGenericArguments();
             var keyType = genericArgs[0];
             var valueType = genericArgs[1];
-            if (keyType != typeof(string)) {
+            if (keyType != typeof(string))
+            {
                 throw new ArgumentException("key type must be string");
             }
             throw new NotImplementedException();
         }
 
-        internal static Expression MapToDictionary(MapInfo p) {
+        internal static Expression MapToDictionary(MapInfo p)
+        {
             List<Expression> body = new List<Expression>();
             var genericArgs = p.TargetType.GetGenericArguments();
             var keyType = genericArgs[0];
             var valueType = genericArgs[1];
-            if (keyType != typeof(string)) {
+            if (keyType != typeof(string))
+            {
                 throw new ArgumentException("key type must be string");
             }
             var dicType = typeof(Dictionary<,>).MakeGenericType(genericArgs);
@@ -68,9 +79,11 @@ namespace MT.KitTools.Mapper.ExpressionCore {
             //body.Add(dicExpression);
             body.Add(Expression.Assign(dicExpression, Expression.New(dicType)));
             // dic.Add();
-            foreach (PropertyInfo property in props) {
+            foreach (PropertyInfo property in props)
+            {
                 if (!property.CanRead) continue;
-                if (valueType == typeof(object) || valueType == property.PropertyType) {
+                if (valueType == typeof(object) || valueType == property.PropertyType)
+                {
                     var key = Expression.Constant(property.Name, keyType);
                     var value = Expression.Property(p.SourceExpression, property);
                     MethodCallExpression callAdd = Expression.Call(dicExpression, addMethod, key, Expression.Convert(value, valueType));
@@ -83,7 +96,8 @@ namespace MT.KitTools.Mapper.ExpressionCore {
             return block;
         }
 
-        internal static Expression ClassMap(MapInfo p) {
+        internal static Expression ClassMap(MapInfo p)
+        {
             var source = p.SourceExpression as ParameterExpression;
             List<MemberBinding> bindings = new List<MemberBinding>();
             initBindings(ref bindings, source, p.Rules);
@@ -91,7 +105,8 @@ namespace MT.KitTools.Mapper.ExpressionCore {
             return body;
         }
 
-        internal static MemberInitExpression ClassMap(List<MappingRule> rules, Type sourceType, Type targetType, object source) {
+        internal static MemberInitExpression ClassMap(List<MappingRule> rules, Type sourceType, Type targetType, object source)
+        {
             ParameterExpression parameterExpression = Expression.Variable(sourceType, "source");
             Expression.Assign(parameterExpression, Expression.Constant(source, sourceType));
             List<MemberBinding> bindings = new List<MemberBinding>();
@@ -99,27 +114,32 @@ namespace MT.KitTools.Mapper.ExpressionCore {
             return Expression.MemberInit(Expression.New(targetType), bindings);
         }
 
-        private static void initBindings(ref List<MemberBinding> memberBindings, ParameterExpression parameterExpression, IList<MappingRule> rules) {
-            foreach (var rule in rules) {
+        private static void initBindings(ref List<MemberBinding> memberBindings, ParameterExpression parameterExpression, IList<MappingRule> rules)
+        {
+            foreach (var rule in rules)
+            {
                 Expression valueExp = GetValueExpression(parameterExpression, rule);
                 MemberAssignment bind = Expression.Bind(rule.MapTo, valueExp);
                 memberBindings.Add(bind);
             }
         }
-        private static Expression GetValueExpression(ParameterExpression parameter, MappingRule rule) {
+        private static Expression GetValueExpression(ParameterExpression parameter, MappingRule rule)
+        {
             var prop = rule.MapFrom;
             var bind = Expression.Property(parameter, prop);
             Expression convertedBind = DataTypeConvert.GetConversionExpression(bind, rule.MapFrom.PropertyType, rule.MapTo.PropertyType);
             return convertedBind;
         }
 
-        internal static Expression CollectionMap(MapInfo p) {
+        internal static Expression CollectionMap(MapInfo p)
+        {
             List<Expression> body = new List<Expression>();
             var source = p.SourceExpression as ParameterExpression;
 
             var moveNext = typeof(IEnumerator).GetMethod("MoveNext");
             var getEnumerator = p.SourceType.GetMethod("GetEnumerator");
-            if (getEnumerator == null) {
+            if (getEnumerator == null)
+            {
                 getEnumerator = typeof(IEnumerable<>).MakeGenericType(p.SourceElementType).GetMethod("GetEnumerator");
             }
             /*
@@ -148,7 +168,8 @@ namespace MT.KitTools.Mapper.ExpressionCore {
             ParameterExpression temp = Expression.Variable(p.TargetElementType, "temp");
             body.Add(Expression.Assign(listExpression, Expression.New(listType)));
 
-            if (p.TargetType.IsICollectionType()) {
+            if (p.TargetType.IsICollectionType())
+            {
                 List<Expression> loopBody = new List<Expression>();
                 MethodCallExpression enumerator = Expression.Call(source, getEnumerator);
                 ConditionalExpression loopCondition = Expression.IfThen(
@@ -164,7 +185,7 @@ namespace MT.KitTools.Mapper.ExpressionCore {
                 Expression.Assign(temp, targetValue);
                 var listAdd = Expression.Call(listExpression, addMethod, temp);
                 loopBody.Add(loopCondition);
-                loopBody.Add(listAdd) ;
+                loopBody.Add(listAdd);
                 var loop = Expression.Loop(Expression.Block(loopBody), endLabel);
                 body.Add(loop);
                 //body.Add(Expression.Label(endLabel));
