@@ -15,19 +15,19 @@ namespace MT.KitTools.Mapper
         ClassObjectToDictionary,
         DictionaryToClassObject
     }
-    public partial class MappingProfile<TFrom, TTarget> : Profiles
+    public class MappingProfile<TFrom, TTarget> : Profiles
     {
-
         private Type sourceType;
         private Type targetType;
-
         private Type SourceElementType => sourceType.IsICollectionType() ? sourceType.GetCollectionElementType() : sourceType;
         private Type TargetElementType => targetType.IsICollectionType() ? targetType.GetCollectionElementType() : targetType;
-
         public override IList<MappingRule> Rules { get; }
         protected Action<TFrom, TTarget> MapAction { get; set; }
         protected MapperConfig MapperConfig { get; } = MapperConfigProvider.GetMapperConfig();
-
+        public MappingProfile(Type type1, Type type2)
+        {
+            types = new[] { type1, type2 };
+        }
         internal MappingProfile()
         {
             sourceType = typeof(TFrom);

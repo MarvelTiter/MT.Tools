@@ -17,7 +17,7 @@ namespace MT.KitTools.Mapper
     {
         public static TTarget Map<TFrom, TTarget>(TFrom source)
         {
-            return Default.InnerMap<TFrom, TTarget>(source);
+            return Mapper.Default.NewMap<TFrom, TTarget>(source);
         }
         public static IEnumerable<TTarget> Map<TFrom, TTarget>(IEnumerable<TFrom> sources)
         {
@@ -45,53 +45,12 @@ namespace MT.KitTools.Mapper
         /// <param name="context"></param>
         public void CreateMap<TFrom, TTarget>(Action<MappingProfile<TFrom, TTarget>> context = null)
         {
-            var map = CreateProfile<TFrom, TTarget>();
+            var map = MapperExtensions.CreateProfile<TFrom, TTarget>();
             context?.Invoke(map);
         }
-        /// <summary>
-        /// 创建 MappingProfile，并检查是否重复
-        /// </summary>
-        /// <typeparam name="TFrom"></typeparam>
-        /// <typeparam name="TTarget"></typeparam>
-        /// <returns></returns>
-        private static MappingProfile<TFrom, TTarget> CreateProfile<TFrom, TTarget>()
+        public TTarget NewMap<TFrom, TTarget>(TFrom source)
         {
-            var map = new MappingProfile<TFrom, TTarget>();
-            ProfileProvider.Cache(map, typeof(TFrom), typeof(TTarget));
-            return map;
-        }
-
-        public TTarget InnerMap<TFrom, TTarget>(TFrom source)
-        {
-            return MapperLink<TFrom, TTarget>.Map(source);
-        }
-
-        /// <summary>
-        /// 泛型缓存
-        /// </summary>
-        /// <typeparam name="TFrom"></typeparam>
-        /// <typeparam name="TTarget"></typeparam>
-        internal static class MapperLink<TFrom, TTarget>
-        {
-            private static readonly Func<object, TTarget> converter;
-            private static Profiles profile = null;
-            static MapperLink()
-            {
-                // 
-                Type sourceType = typeof(TFrom);
-                Type targetType = typeof(TTarget);
-                profile = ProfileProvider.GetProfile(sourceType, targetType);
-                if (profile == null)
-                {
-                    profile = CreateProfile<TFrom, TTarget>();
-                }
-                converter = (Func<object, TTarget>)profile.CreateDelegate();
-            }
-
-            public static TTarget Map(TFrom source)
-            {
-                return converter.Invoke(source);
-            }
+            return MapperExtensions.MapperLink<TFrom, TTarget>.Create(source);
         }
     }
 }
