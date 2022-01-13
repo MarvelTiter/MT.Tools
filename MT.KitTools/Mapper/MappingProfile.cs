@@ -41,11 +41,11 @@ namespace MT.KitTools.Mapper
             Rules.Clear();
             var targetProps = TargetElementType.GetProperties();
             var sourceProps = SourceElementType.GetProperties();
-            foreach (var item in targetProps)
+            foreach (var tar in targetProps)
             {
-                var sourceMember = sourceProps.FirstOrDefault(p => MapperConfig.Match(p, item));
-                if (!Rules.Any(r => r.MapTo == item) && sourceMember != null)
-                    AddMap(item, sourceMember);
+                var source = sourceProps.FirstOrDefault(p => MapperConfig.Match(p, tar));
+                if (tar.CanWrite && !Rules.Any(r => r.MapTo == tar) && source != null)
+                    AddMap(tar, source);
             }
         }
 

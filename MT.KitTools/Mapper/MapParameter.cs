@@ -8,7 +8,7 @@ namespace MT.KitTools.Mapper
     public enum ActionType
     {
         NewObj,
-        Assign
+        Ref
     }
     internal class MapInfo
     {

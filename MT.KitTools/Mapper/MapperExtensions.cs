@@ -75,7 +75,7 @@ namespace MT.KitTools.Mapper
                 {
                     profile = CreateProfile<TFrom, TTarget>();
                 }
-                action = (Action<TFrom, TTarget>)profile.CreateDelegate(ActionType.Assign);
+                action = (Action<TFrom, TTarget>)profile.CreateDelegate(ActionType.Ref);
             }
 
             public static void Invoke(TFrom source, TTarget target)

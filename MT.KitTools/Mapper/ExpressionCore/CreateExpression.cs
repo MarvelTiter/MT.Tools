@@ -31,7 +31,7 @@ namespace MT.KitTools.Mapper.ExpressionCore
                 p.Parameters.Add(pExp);
                 p.Variables.Add(p.SourceExpression as ParameterExpression);
             }
-            else if (p.ActionType == ActionType.Assign)
+            else if (p.ActionType == ActionType.Ref)
             {               
                 p.TargetExpression = Expression.Parameter(p.TargetType, "tar");
                 p.SourceExpression = Expression.Parameter(p.SourceType, "from");                
