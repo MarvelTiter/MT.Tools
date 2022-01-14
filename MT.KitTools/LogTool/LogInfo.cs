@@ -27,7 +27,7 @@ namespace MT.KitTools.LogTool
         /// <summary>
         /// 异常对象
         /// </summary>
-        public Exception Exception { get; set; }
+        public LogException Exception { get; set; }
         /// <summary>
         /// 触发日志的源文件
         /// </summary>
