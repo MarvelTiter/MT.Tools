@@ -61,19 +61,7 @@ namespace MT.KitTools.LogTool
         public static void Info(string msg,
             [CallerFilePath] string callerPath = null,
             [CallerLineNumber] int callerLine = 0,
-            [CallerMemberName] string callerMethod = null)
-        {
-            var log = new LogInfo()
-            {
-                LogLevel = LogLevel.Info,
-                Message = msg,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Source = callerPath,
-                LogLine = callerLine,
-                LogMember = callerMethod,
-            };
-            Write(log);
-        }
+            [CallerMemberName] string callerMethod = null) => Write(LogLevel.Info, msg, callerPath, callerLine, callerMethod);
 
         /// <summary>
         /// 写入debug级别日志
@@ -81,19 +69,7 @@ namespace MT.KitTools.LogTool
         public static void Debug(string msg,
             [CallerFilePath] string callerPath = null,
             [CallerLineNumber] int callerLine = 0,
-            [CallerMemberName] string callerMethod = null)
-        {
-            LogInfo log = new LogInfo()
-            {
-                LogLevel = LogLevel.Debug,
-                Message = msg,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Source = callerPath,
-                LogLine = callerLine,
-                LogMember = callerMethod,
-            };
-            Write(log);
-        }
+            [CallerMemberName] string callerMethod = null) => Write(LogLevel.Debug, msg, callerPath, callerLine, callerMethod);
 
         /// <summary>
         /// 写入warn级别日志
@@ -101,19 +77,7 @@ namespace MT.KitTools.LogTool
         public static void Warn(string msg,
             [CallerFilePath] string callerPath = null,
             [CallerLineNumber] int callerLine = 0,
-            [CallerMemberName] string callerMethod = null)
-        {
-            LogInfo log = new LogInfo()
-            {
-                LogLevel = LogLevel.Warn,
-                Message = msg,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Source = callerPath,
-                LogLine = callerLine,
-                LogMember = callerMethod,
-            };
-            Write(log);
-        }
+            [CallerMemberName] string callerMethod = null) => Write(LogLevel.Warn, msg, callerPath, callerLine, callerMethod);
 
         /// <summary>
         /// 写入error级别日志
@@ -121,20 +85,7 @@ namespace MT.KitTools.LogTool
         public static void Error(Exception error,
             [CallerFilePath] string callerPath = null,
             [CallerLineNumber] int callerLine = 0,
-            [CallerMemberName] string callerMethod = null)
-        {
-            LogInfo log = new LogInfo()
-            {
-                LogLevel = LogLevel.Error,
-                Message = error.Message,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Exception = error,
-                Source = callerPath,
-                LogLine = callerLine,
-                LogMember = callerMethod,
-            };
-            Write(log);
-        }
+            [CallerMemberName] string callerMethod = null) => Write(LogLevel.Error, error.Message, callerPath, callerLine, callerMethod, error);
 
         /// <summary>
         /// 写入error级别日志
@@ -142,19 +93,7 @@ namespace MT.KitTools.LogTool
         public static void Error(string msg,
             [CallerFilePath] string callerPath = null,
             [CallerLineNumber] int callerLine = 0,
-            [CallerMemberName] string callerMethod = null)
-        {
-            LogInfo log = new LogInfo()
-            {
-                LogLevel = LogLevel.Error,
-                Message = msg,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Source = callerPath,
-                LogLine = callerLine,
-                LogMember = callerMethod,
-            };
-            Write(log);
-        }
+            [CallerMemberName] string callerMethod = null) => Write(LogLevel.Error, msg, callerPath, callerLine, callerMethod);
 
         /// <summary>
         /// 写入fatal级别日志
@@ -162,20 +101,7 @@ namespace MT.KitTools.LogTool
         public static void Fatal(Exception fatal,
             [CallerFilePath] string callerPath = null,
             [CallerLineNumber] int callerLine = 0,
-            [CallerMemberName] string callerMethod = null)
-        {
-            LogInfo log = new LogInfo()
-            {
-                LogLevel = LogLevel.Fatal,
-                Message = fatal.Message,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Exception = fatal,
-                Source = callerPath,
-                LogLine = callerLine,
-                LogMember = callerMethod,
-            };
-            Write(log);
-        }
+            [CallerMemberName] string callerMethod = null) => Write(LogLevel.Fatal, fatal.Message, callerPath, callerLine, callerMethod, fatal);
 
         /// <summary>
         /// 写入fatal级别日志
@@ -183,24 +109,23 @@ namespace MT.KitTools.LogTool
         public static void Fatal(string msg,
             [CallerFilePath] string callerPath = null,
             [CallerLineNumber] int callerLine = 0,
-            [CallerMemberName] string callerMethod = null)
-        {
-            LogInfo log = new LogInfo()
-            {
-                LogLevel = LogLevel.Fatal,
-                Message = msg,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Source = callerPath,
-                LogLine = callerLine,
-                LogMember = callerMethod,
-            };
-            Write(log);
-        }
+            [CallerMemberName] string callerMethod = null) => Write(LogLevel.Fatal, msg, callerPath, callerLine, callerMethod);
+
         static object locker = new object();
-        public static void Write(LogInfo logInfo)
+        public static void Write(LogLevel level, string msg, string source, int line, string member, Exception ex = null)
         {
             lock (locker)
             {
+                LogInfo logInfo = new LogInfo()
+                {
+                    LogLevel = level,
+                    Message = msg,
+                    ThreadId = Thread.CurrentThread.ManagedThreadId,
+                    Source = source,
+                    LogLine = line,
+                    LogMember = member,
+                    Exception = ex
+                };
                 foreach (var item in LoggerDict.Values)
                 {
                     item.LogConfig = logConfig;
