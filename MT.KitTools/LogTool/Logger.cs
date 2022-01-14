@@ -124,11 +124,11 @@ namespace MT.KitTools.LogTool
                     Source = source,
                     LogLine = line,
                     LogMember = member,
-                    Exception = new LogException(ex)
+                    Exception = ex
                 };
                 OnLog?.Invoke(logInfo);
 
-                if (logInfo.Exception.Handled)
+                if (logInfo.Handled)
                 {
                     return;
                 }
