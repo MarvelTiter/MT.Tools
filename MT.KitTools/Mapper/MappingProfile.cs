@@ -17,39 +17,12 @@ namespace MT.KitTools.Mapper
     }
     public class MappingProfile<TFrom, TTarget> : Profiles
     {
-        public override IList<MappingRule> Rules { get; }
-        protected Action<TFrom, TTarget> MapAction { get; set; }
-        protected MapperConfig MapperConfig { get; } = MapperConfigProvider.GetMapperConfig();
         internal MappingProfile()
         {
             types = new[] { typeof(TFrom), typeof(TTarget) };
-            Rules = new List<MappingRule>();
-            AutoMap();
-        }
-        public MappingProfile<TFrom, TTarget> Mapping(Action<TFrom, TTarget> action)
-        {
-            MapAction = action;
-            return this;
-        }
+        }               
 
-        public void AutoMap()
-        {
-            if (SourceType.IsDictionary() || TargetType.IsDictionary())
-            {
-                return;
-            }
-            Rules.Clear();
-            var targetProps = TargetElementType.GetProperties();
-            var sourceProps = SourceElementType.GetProperties();
-            foreach (var tar in targetProps)
-            {
-                var source = sourceProps.FirstOrDefault(p => MapperConfig.Match(p, tar));
-                if (tar.CanWrite && !Rules.Any(r => r.MapTo == tar) && source != null)
-                    AddMap(tar, source);
-            }
-        }
-
-        public override bool Exit(Type source, Type target)
+        public bool Exit(Type source, Type target)
         {
             var b1 = isTypeEquals();
             var b2 = isElementTypeEquals();
@@ -67,12 +40,7 @@ namespace MT.KitTools.Mapper
                 return ReferenceEquals(requestSourceType, SourceElementType) && ReferenceEquals(requestTargetType, TargetElementType);
             }
         }
-
-        private void AddMap(PropertyInfo to, PropertyInfo from, string formatter = null)
-        {
-            MappingRule rule = new MappingRule(to, from, formatter);
-            Rules.Add(rule);
-        }
+                
 
         public override Delegate CreateDelegate(ActionType actionType)
         {
@@ -81,30 +49,10 @@ namespace MT.KitTools.Mapper
             p.TargetType = TargetType;
             p.SourceElementType = SourceElementType;
             p.TargetElementType = TargetElementType;
-            p.Rules = Rules;
             p.ActionType = actionType;
+            p.MapRule = MapRuleProvider.GetMapRule(p.SourceElementType, p.TargetElementType);
             var lambda = CreateExpression.ExpressionBuilder(p);
-            if (actionType == ActionType.NewObj)
-            {
-                var del = lambda.Compile() as Func<object, TTarget>;
-                Func<object, TTarget> newFunc = o =>
-                {
-                    var t = del.Invoke(o);
-                    MapAction?.Invoke((TFrom)o, t);
-                    return t;
-                };
-                return newFunc;
-            }
-            else
-            {
-                var del = lambda.Compile() as Action<TFrom, TTarget>;
-                Action<TFrom, TTarget> newAction = (f, t) =>
-                 {
-                     del.Invoke(f, t);
-                     MapAction?.Invoke(f, t);
-                 };
-                return del;
-            }
+            return lambda.Compile();           
         }
     }
 }

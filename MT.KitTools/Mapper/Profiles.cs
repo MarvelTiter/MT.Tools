@@ -17,8 +17,6 @@ namespace MT.KitTools.Mapper
         protected Type TargetType => types[1];
         protected Type SourceElementType => SourceType.IsICollectionType() ? SourceType.GetCollectionElementType() : SourceType;
         protected Type TargetElementType => TargetType.IsICollectionType() ? TargetType.GetCollectionElementType() : TargetType;
-        public abstract bool Exit(Type source, Type target);
-        public abstract IList<MappingRule> Rules { get; }
         public abstract Delegate CreateDelegate(ActionType actionType);
     }
 

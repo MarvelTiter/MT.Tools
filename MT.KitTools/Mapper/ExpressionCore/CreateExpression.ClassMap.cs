@@ -13,6 +13,7 @@ namespace MT.KitTools.Mapper.ExpressionCore
         internal static void ClassMap(MapInfo p, List<Expression> body)
         {
             Type targetType = p.TargetType;
+            var rules = p.MapRule?.Maps;
             if (p.TargetExpression == null)
             {
                 p.TargetExpression = Expression.Variable(targetType, "tar");
@@ -20,11 +21,20 @@ namespace MT.KitTools.Mapper.ExpressionCore
                 p.Variables.Add(p.TargetExpression as ParameterExpression);
             }
 
-            foreach (var rule in p.Rules)
+            foreach (var rule in rules)
             {
                 Expression valueExp = GetValueExpression(p.SourceExpression, rule);
                 MethodCallExpression setPropExp = Expression.Call(p.TargetExpression, rule.MapTo.SetMethod, valueExp);
                 body.Add(setPropExp);
+            }
+
+            if (p.MapRule.MapPostAction != null)
+            {
+                var dyInvoke = typeof(Delegate).GetMethod("DynamicInvoke", new[] { typeof(object[]) });
+                var actionExp = Expression.Constant(p.MapRule.MapPostAction, typeof(Delegate));
+
+                MethodCallExpression postExp = Expression.Call(actionExp, dyInvoke, Expression.NewArrayInit(typeof(object), p.SourceExpression, p.TargetExpression));
+                body.Add(postExp);
             }
 
             if (p.ActionType == ActionType.NewObj)
@@ -50,7 +60,7 @@ namespace MT.KitTools.Mapper.ExpressionCore
             //body.Add(init);
         }
 
-        internal static MemberInitExpression ClassMap(List<MappingRule> rules, Type sourceType, Type targetType, object source)
+        internal static MemberInitExpression ClassMap(List<MappingInfo> rules, Type sourceType, Type targetType, object source)
         {
             ParameterExpression parameterExpression = Expression.Variable(sourceType, "source");
             Expression.Assign(parameterExpression, Expression.Constant(source, sourceType));
@@ -59,7 +69,7 @@ namespace MT.KitTools.Mapper.ExpressionCore
             return Expression.MemberInit(Expression.New(targetType), bindings);
         }
 
-        private static void initBindings(ref List<MemberBinding> memberBindings, ParameterExpression parameterExpression, IList<MappingRule> rules)
+        private static void initBindings(ref List<MemberBinding> memberBindings, ParameterExpression parameterExpression, IList<MappingInfo> rules)
         {
             foreach (var rule in rules)
             {
@@ -68,7 +78,7 @@ namespace MT.KitTools.Mapper.ExpressionCore
                 memberBindings.Add(bind);
             }
         }
-        private static Expression GetValueExpression(Expression parameter, MappingRule rule)
+        private static Expression GetValueExpression(Expression parameter, MappingInfo rule)
         {
             var prop = rule.MapFrom;
             var bind = Expression.Property(parameter, prop);

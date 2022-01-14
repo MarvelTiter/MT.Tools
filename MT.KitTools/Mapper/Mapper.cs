@@ -26,10 +26,21 @@ namespace MT.KitTools.Mapper
                 yield return Map<TFrom, TTarget>(item);
             }
         }
+        /// <summary>
+        /// 创建 MappingProfile，并检查是否重复
+        /// </summary>
+        /// <typeparam name="TFrom"></typeparam>
+        /// <typeparam name="TTarget"></typeparam>
+        /// <returns></returns>
+        //internal static MapperRule<TFrom, TTarget> CreateMappingRule<TFrom, TTarget>()
+        //{
+        //    var rule = new MapperRule<TFrom, TTarget>();
+        //    MapRuleProvider.Cache(rule, typeof(TFrom), typeof(TTarget));
+        //    return rule;
+        //}
         public static Mapper Default => new Mapper();
 
-        private MapperConfig Config => new MapperConfig();
-
+        private MapperConfig Config => MapperConfigProvider.GetMapperConfig();
         private Mapper() { }
 
         public Mapper Configuration(Action<MapperConfig> config)
@@ -44,9 +55,9 @@ namespace MT.KitTools.Mapper
         /// <typeparam name="TFrom"></typeparam>
         /// <typeparam name="TTarget"></typeparam>
         /// <param name="context"></param>
-        public Mapper CreateMap<TFrom, TTarget>(Action<MappingProfile<TFrom, TTarget>> context = null)
+        public Mapper CreateMap<TFrom, TTarget>(Action<MapperRule<TFrom, TTarget>> context = null)
         {
-            var map = MapperExtensions.CreateProfile<TFrom, TTarget>();
+            var map =  (MapperRule<TFrom, TTarget>)MapRuleProvider.GetMapRule<TFrom, TTarget>();
             context?.Invoke(map);
             return this;
         }

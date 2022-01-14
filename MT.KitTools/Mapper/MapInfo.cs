@@ -18,7 +18,7 @@ namespace MT.KitTools.Mapper
         public Type TargetElementType { get; set; }
         public Expression SourceExpression { get; set; }
         public Expression TargetExpression { get; set; }
-        public IList<MappingRule> Rules { get; set; }
+        public IMapperRule MapRule { get; set; }
         public ActionType ActionType { get; set; }
         public List<ParameterExpression> Parameters { get; set; } = new List<ParameterExpression>();
         public List<ParameterExpression> Variables { get; set; } = new List<ParameterExpression>();
