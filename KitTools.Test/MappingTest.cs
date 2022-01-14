@@ -1,8 +1,10 @@
 ﻿using KitTools.Test.Models;
 using MT.KitTools.Mapper;
+using MT.KitTools.StringExtension;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace KitTools.Test
 {
@@ -42,11 +44,22 @@ namespace KitTools.Test
                 {
                     ut.NA = $"{u.Name} => {u.Age}";
                 });
+            }).CreateMap<UserDTO, User>(profile =>
+            {
+                profile.Mapping((ut, u) =>
+                {
+                    var m = Regex.Match(ut.NA, "(\\w+) => (\\d+)");
+                    if (m.Success)
+                    {
+                        u.Name = m.Groups[1].Value;
+                        m.Groups[2].Value.IsNumeric<int>(out var a);
+                        u.Age = a;
+                    }
+                });
             });
+
             userDto.Avatar = avatarBytes;
             user.Avatar = avatarBytes;
-
-
         }
 
         [Test]
@@ -62,7 +75,11 @@ namespace KitTools.Test
         {
             var ud = Mapper.Map<User, UserDTO>(user);
             Assert.IsTrue(ud.NA == $"{user.Name} => {user.Age}");
-        }
+
+            var u = Mapper.Map<UserDTO,User>(userDto);
+            Assert.IsTrue(u.Age == 20);
+            Assert.IsTrue(u.Name == "Marvel");
+        }        
 
         [Test]
         public void MapToDictionaryObject()
