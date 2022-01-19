@@ -6,7 +6,8 @@ namespace MT.KitTools.LogTool
     public enum LogType
     {
         Console = 1,
-        File = 1 << 1,
+        Debug = 1 << 1,
+        File = 1 << 2,
     }
     /// <summary>
     /// 日志级别

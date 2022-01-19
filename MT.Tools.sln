@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MT.KitTools", "MT.KitTools\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KitTools.Test", "KitTools.Test\KitTools.Test.csproj", "{2FC96A50-ACFD-4C5A-8EEC-F6AB47A83DBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerConsoleTest", "LoggerConsoleTest\LoggerConsoleTest.csproj", "{824D5221-B5B8-4212-847E-CA90489D9F13}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoggerConsoleTest", "LoggerConsoleTest\LoggerConsoleTest.csproj", "{824D5221-B5B8-4212-847E-CA90489D9F13}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTest", "WebTest\WebTest.csproj", "{0AD15822-53A7-4CF2-ABE6-309925035CC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{824D5221-B5B8-4212-847E-CA90489D9F13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{824D5221-B5B8-4212-847E-CA90489D9F13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{824D5221-B5B8-4212-847E-CA90489D9F13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AD15822-53A7-4CF2-ABE6-309925035CC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AD15822-53A7-4CF2-ABE6-309925035CC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AD15822-53A7-4CF2-ABE6-309925035CC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AD15822-53A7-4CF2-ABE6-309925035CC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

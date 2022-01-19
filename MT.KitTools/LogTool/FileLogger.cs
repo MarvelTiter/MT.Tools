@@ -120,7 +120,7 @@ namespace MT.KitTools.LogTool
             }
         }
 
-        public void Dispose()
+        ~FileLogger()
         {
             CancellationTokenSource.Cancel();
         }

@@ -8,6 +8,7 @@ namespace MT.KitTools.LogTool
 {
     public class LogConfig
     {
+        public LogType EnabledLog { get; set; } = LogType.Console | LogType.Debug | LogType.File;
         public string LogDirectory { get; set; }
     }
 }

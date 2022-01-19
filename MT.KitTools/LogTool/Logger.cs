@@ -5,6 +5,68 @@ using System.Threading;
 
 namespace MT.KitTools.LogTool
 {
+    public class LoggerManage
+    {
+        private readonly string name;
+        private readonly LogConfig config;
+
+        private Dictionary<string, ILogger> LoggerDict { get; } = new Dictionary<string, ILogger>();
+        public LoggerManage(string name, LogConfig config)
+        {
+            this.name = name;
+            this.config = config;
+            Init();
+        }
+        private void Init()
+        {
+            if (config.EnabledLog.HasFlag(LogType.Console))
+            {
+                if (!LoggerDict.ContainsKey("Console"))
+                    LoggerDict.Add("Console", new ConsoleLogger());
+            }
+            if (config.EnabledLog.HasFlag(LogType.Debug))
+            {
+                if (!LoggerDict.ContainsKey("Debug"))
+                    LoggerDict.Add("Debug", new DebugLogger());
+            }
+            if (config.EnabledLog.HasFlag(LogType.File))
+            {
+                if (!LoggerDict.ContainsKey("File"))
+                    LoggerDict.Add("File", new FileLogger());
+            }
+        }
+
+        public void Log(LogLevel level, string msg, Exception ex = null,
+             [CallerFilePath] string callerPath = null,
+            [CallerLineNumber] int callerLine = 0,
+            [CallerMemberName] string callerMethod = null)
+        {
+            LogInfo logInfo = new LogInfo()
+            {
+                LogLevel = level,
+                Message = msg,
+                ThreadId = Thread.CurrentThread.ManagedThreadId,
+                Source = callerPath,
+                LogLine = callerLine,
+                LogMember = callerMethod,
+                Exception = ex
+            };
+
+            foreach (var item in LoggerDict.Values)
+            {
+                item.LogConfig = config;
+                item.WriteLog(logInfo);
+            }
+        }
+
+    }
+    public class LoggerFactory
+    {
+        public static LoggerManage GetLogger(string name, LogConfig config)
+        {
+            return new LoggerManage(name, config);
+        }
+    }
     public class Logger
     {
         private static Dictionary<string, ILogger> LoggerDict { get; } = new Dictionary<string, ILogger>();
@@ -14,12 +76,24 @@ namespace MT.KitTools.LogTool
             logConfig = new LogConfig();
             action?.Invoke(logConfig);
         }
+        /// <summary>
+        /// 启用所有默认日志 Console | Debug | File
+        /// </summary>
+        public static void EnableAllDefault()
+        {
+            Enable(LogType.Console | LogType.Debug | LogType.File);
+        }
         public static void Enable(LogType logType)
         {
             if (logType.HasFlag(LogType.Console))
             {
                 if (!LoggerDict.ContainsKey("Console"))
                     LoggerDict.Add("Console", new ConsoleLogger());
+            }
+            if (logType.HasFlag(LogType.Debug))
+            {
+                if (!LoggerDict.ContainsKey("Debug"))
+                    LoggerDict.Add("Debug", new DebugLogger());
             }
             if (logType.HasFlag(LogType.File))
             {
@@ -39,17 +113,17 @@ namespace MT.KitTools.LogTool
             {
                 LoggerDict.Remove("Console");
             }
+            if (logType.HasFlag(LogType.Debug))
+            {
+                LoggerDict.Remove("Debug");
+            }
             if (logType.HasFlag(LogType.File))
             {
-                var logger = LoggerDict["File"];
-                logger.Dispose();
                 LoggerDict.Remove("File");
             }
         }
         public static void Disable(string key)
         {
-            var logger = LoggerDict[key];
-            logger.Dispose();
             LoggerDict.Remove(key);
         }
 
