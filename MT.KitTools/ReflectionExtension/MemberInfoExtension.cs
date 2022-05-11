@@ -96,5 +96,21 @@ namespace MT.KitTools.ReflectionExtension {
             var prop = self.GetType().GetProperty(propName);
             self.Set(prop, value);
         }
+
+        public static T Get<T>(this object self, string prop)
+        {
+            //TODO Member Access
+            throw new NotImplementedException();
+        }
+
+        public static T Parse<T>(this object self)
+        {
+            if (self is null)
+            {
+                return default;
+            }
+            var type = typeof(T).GetEnumUnderlyingType() ?? typeof(T);
+            return (T)Convert.ChangeType(self, type);
+        }
     }
 }
