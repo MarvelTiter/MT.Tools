@@ -9,7 +9,12 @@ namespace MT.KitTools.StringExtension
     {
         public static string If(this string self, Func<bool> condition)
         {
-            if (condition.Invoke())
+            return self.If(condition.Invoke());
+        }
+
+        public static string If(this string self, bool condition)
+        {
+            if (condition)
             {
                 return self;
             }
@@ -32,7 +37,7 @@ namespace MT.KitTools.StringExtension
 
         public static bool IsNumeric<T>(this string self, out T value) where T : struct
         {
-            var match = Regex.IsMatch(self, @"([1-9]\d*\.?\d*)|(0\.\d*[1-9])");
+            var match = self.IsNumeric();
             if (match)
             {
                 value = (T)Convert.ChangeType(self, typeof(T));
@@ -40,6 +45,18 @@ namespace MT.KitTools.StringExtension
             else
                 value = default;
             return match;
+        }
+
+        public static bool IsNumeric(this string self)
+        {
+            var match = Regex.IsMatch(self, @"([1-9]\d*\.?\d*)|(0\.\d*[1-9])");
+            return match;
+        }
+
+        public static void AppendTo(this string str, StringBuilder builder)
+        {
+            if (str.IsEnable())
+                builder.AppendLine(str);
         }
     }
 }
